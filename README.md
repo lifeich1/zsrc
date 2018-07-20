@@ -1,0 +1,3 @@
+# zsrc
+
+simple scripts collection.
