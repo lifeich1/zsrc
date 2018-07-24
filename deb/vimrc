@@ -1,0 +1,26 @@
+filetype plugin indent on
+set et
+set ts=4
+set sw=4
+set sts=-1
+set backspace=eol,start,indent
+set ruler
+set nocompatible
+set showcmd
+syntax on
+
+set fileencodings=utf-8,gbk,latin1
+
+map <Up> gk
+map <Down> gj
+
+
+colorscheme default
+
+
+call plug#begin('~/.vim/plugged')
+
+Plug 'sheerun/vim-polyglot'
+Plug 'vim-scripts/taglist.vim'
+
+call plug#end()

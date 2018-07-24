@@ -1,0 +1,7 @@
+#!/bin/bash
+
+RandomCommitMsg() {
+    curl -s http://whatthecommit.com/index.txt
+}
+
+alias cman='man -M /usr/share/man/zh_CN'
