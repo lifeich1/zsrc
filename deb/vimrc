@@ -22,5 +22,7 @@ call plug#begin('~/.vim/plugged')
 
 Plug 'sheerun/vim-polyglot'
 Plug 'vim-scripts/taglist.vim'
+Plug 'majutsushi/tagbar'
+"Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries'}
 
 call plug#end()

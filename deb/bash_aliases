@@ -5,3 +5,4 @@ RandomCommitMsg() {
 }
 
 alias cman='man -M /usr/share/man/zh_CN'
+alias man='man -M /usr/share/man'
