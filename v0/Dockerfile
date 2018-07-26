@@ -1,4 +1,4 @@
-FROM debian:stable
+FROM debian:9
 
 ENV SSR_CONFPTH     /tmp/config.json
 ENV PRE_RUNSH       _run.sh
@@ -18,6 +18,7 @@ ARG BRANCH=manyuser
 ARG WORK=~
 
 
+COPY ./apt.list /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y python \
     libsodium-dev \
