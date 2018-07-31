@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+SSR_PORT=2333
 
 cat > /root/config.json << END
 {
@@ -8,10 +10,10 @@ cat > /root/config.json << END
     "local_address": "127.0.0.1",
     "local_port": 1080,
 
-    "password": "psw",
+    "password": "pwd",
     "method": "chacha20",
     "protocol": "auth_aes128_sha1",
-    "protocol_param": "5",
+    "protocol_param": "20",
     "obfs": "tls1.2_ticket_auth",
     "obfs_param": "",
     "speed_limit_per_con": 0,
@@ -27,6 +29,9 @@ cat > /root/config.json << END
 }
 END
 
-docker run -itd --name ssr -p 2333:2333 \
+docker run -itd --name ssr -p $SSR_PORT:2333 \
     -v /root/config.json:/tmp/config.json \
     lintd/ssr
+
+echo 
+echo '[done]'
