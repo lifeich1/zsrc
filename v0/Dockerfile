@@ -1,5 +1,8 @@
 FROM debian:9 as builder
 
+ARG BRANCH=manyuser
+ARG WORK=/root
+
 COPY ./apt.list /etc/apt/sources.list
 RUN apt-get update
 RUN apt-get install -y python \
