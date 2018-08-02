@@ -14,9 +14,10 @@ RUN wget https://github.com/syncthing/syncthing/releases/download/v0.14.49/synct
 RUN tar zxvf sync.tar.gz
 RUN mv `ls | grep syncthing-linux-amd64` sync
 RUN cp sync/syncthing /usr/bin/
+RUN rm -rf sync
 
 EXPOSE 8384
 EXPOSE 22000
-EXPOSE 22027
+EXPOSE 21027/udp
 
 CMD syncthing -no-browser -gui-address=0.0.0.0:8384
