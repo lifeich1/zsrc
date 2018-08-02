@@ -34,12 +34,14 @@ ARG WORK=/root
 
 
 RUN mkdir -p /usr/lib/x86_64-linux-gnu/pkgconfig/
-COPY --from=builder /usr/lib/x86_64-linux-gnu/libsodium.* /usr/lib/x86_64-linux-gnu/
-COPY --from=builder /usr/include/sodium* /usr/include/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libsodium.a /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libsodium.so /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/include/sodium /usr/include/
+COPY --from=builder /usr/include/sodium.h /usr/include/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/pkgconfig/libsodium.pc /usr/lib/x86_64-linux-gnu/pkgconfig/
 RUN ldconfig
 
-COPY --from=builder /root/shadowsocksr-$BRANCH/shadowsocks $WORK/shadowsocksr-$BRANCH/
+COPY --from=builder /root/shadowsocksr-$BRANCH/shadowsocks $WORK/shadowsocksr-$BRANCH/shadowsocks/
 
 WORKDIR $WORK/shadowsocksr-$BRANCH/shadowsocks
 
