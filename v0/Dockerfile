@@ -5,7 +5,7 @@ ARG WORK=/root
 
 COPY ./apt.list /etc/apt/sources.list
 RUN apt-get update
-RUN apt-get install -y python \
+RUN apt-get install -y \
     libsodium-dev \
     wget
 
@@ -32,6 +32,10 @@ ENV DNS_ADDR_2      8.8.4.4
 ARG BRANCH=manyuser
 ARG WORK=/root
 
+
+COPY ./apt.list /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install -y python
 
 RUN mkdir -p /usr/lib/x86_64-linux-gnu/pkgconfig/
 COPY --from=builder /usr/lib/x86_64-linux-gnu/libsodium.a /usr/lib/x86_64-linux-gnu/
