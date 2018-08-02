@@ -12,6 +12,7 @@ WORKDIR $HOME
 
 RUN wget https://github.com/syncthing/syncthing/releases/download/v0.14.49/syncthing-linux-amd64-v0.14.49.tar.gz -O sync.tar.gz
 RUN tar zxvf sync.tar.gz
+RUN mv `ls | grep syncthing-linux-amd64` sync
 RUN cp sync/syncthing /usr/bin/
 
 EXPOSE 8384
