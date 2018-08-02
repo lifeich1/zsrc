@@ -1,3 +1,15 @@
+FROM debian:9 as builder
+
+COPY ./apt.list /etc/apt/sources.list
+RUN apt-get update
+RUN apt-get install -y python \
+    libsodium-dev \
+    wget
+
+RUN wget -qO- --no-check-certificate https://github.com/ToyoDAdoubi/shadowsocksr/archive/$BRANCH.tar.gz | tar -xzf - -C /root
+
+
+
 FROM debian:9
 
 ENV SSR_CONFPTH     /tmp/config.json
@@ -15,19 +27,16 @@ ENV DNS_ADDR        8.8.8.8
 ENV DNS_ADDR_2      8.8.4.4
 
 ARG BRANCH=manyuser
-ARG WORK=~
+ARG WORK=/root
 
 
-COPY ./apt.list /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y python \
-    libsodium-dev \
-    wget
+RUN mkdir -p /usr/lib/x86_64-linux-gnu/pkgconfig/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/libsodium.* /usr/lib/x86_64-linux-gnu/
+COPY --from=builder /usr/include/sodium* /usr/include/
+COPY --from=builder /usr/lib/x86_64-linux-gnu/pkgconfig/libsodium.pc /usr/lib/x86_64-linux-gnu/pkgconfig/
+RUN ldconfig
 
-
-RUN mkdir -p $WORK && \
-    wget -qO- --no-check-certificate https://github.com/ToyoDAdoubi/shadowsocksr/archive/$BRANCH.tar.gz | tar -xzf - -C $WORK
-
+COPY --from=builder /root/shadowsocksr-$BRANCH/shadowsocks $WORK/shadowsocksr-$BRANCH/
 
 WORKDIR $WORK/shadowsocksr-$BRANCH/shadowsocks
 
