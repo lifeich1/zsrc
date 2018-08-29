@@ -6,7 +6,7 @@ cat > /root/config.json << END
 {
     "server": "0.0.0.0",
     "server_ipv6": "::",
-    "server_port": 2333,
+    "server_port": $SSR_PORT,
     "local_address": "127.0.0.1",
     "local_port": 1080,
 
@@ -29,7 +29,7 @@ cat > /root/config.json << END
 }
 END
 
-docker run -itd --name ssr -p $SSR_PORT:2333 \
+docker run -itd --name ssr -p $SSR_PORT:$SSR_PORT \
     -v /root/config.json:/tmp/config.json \
     lintd/ssr
 
