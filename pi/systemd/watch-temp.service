@@ -1,0 +1,12 @@
+[Unit]
+Description=Keep watching system temperature
+After=basic.target
+
+[Service]
+Type=idle
+User=pi
+ExecStart=/home/pi/.local/bin/watch-temp.py
+
+[Install]
+WantedBy=multi-user.target
+
