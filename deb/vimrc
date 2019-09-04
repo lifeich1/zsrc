@@ -1,3 +1,11 @@
+" Vimscript file setting ---- {{{
+augroup filtype_vim
+    autocmd!
+    autocmd FileType vim setlocal foldmethod=marker
+augroup END
+" }}}
+
+" vimrc basic setting ---- {{{
 filetype plugin indent on
 set et
 set ts=4
@@ -10,14 +18,79 @@ set showcmd
 syntax on
 
 set fileencodings=utf-8,gbk,latin1
+set modelines=5
+" }}}
 
-map <Up> gk
-map <Down> gj
+mapclear
 
+" vimrc basic map ---- {{{
+noremap <Up> gk
+noremap <Down> gj
+inoremap <F2> <Esc>:w<CR>a
+" }}}
 
-colorscheme default
+let mapleader = " "
+let maplocalleader = "\\"
 
+" Funky practice ---- {{{
+nnoremap <leader>w :match Error /\ \+$/<cr>
+nnoremap <leader>W :match none<cr>
+" }}}
 
+" vimrc os detection ---- {{{
+if has('unix')
+    let s:uname = system("echo -n \"$(uname)\"")
+    if !v:shell_error && s:uname ==# "Darwin"
+        let s:os = "osx"
+    else
+        let s:os = "linux"
+    endif
+else
+    let s:os = "win"
+endif
+" }}}
+
+" Script functions --- {{{
+" function s:MyToggleFoldColumn() ---- {{{
+function! s:MyToggleFoldColumn(n)
+    if &foldcolumn >= a:n
+        setlocal foldcolumn=0
+    else
+        let &l:foldcolumn=a:n
+    endif
+endfunction
+" }}}
+" }}}
+
+" vimrc high-lv map ---- {{{
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+nnoremap <leader>sv :source $MYVIMRC<cr>
+
+if has('clipboard')
+    let s:clip_cmd = ":%y +<cr>"
+elseif s:os ==# "osx"
+    let s:clip_cmd = ":w !pbcopy<cr><cr>"
+elseif s:os ==# "linux"
+    let s:clip_cmd = ":w !xsel -b<cr><cr>"
+endif
+let s:clip_cmd_v = s:clip_cmd . ":echo bufname('%') \"all copied.\"<cr>"
+execute "nnoremap <leader>ya " . s:clip_cmd_v
+
+nnoremap <leader>fl :call <SID>MyToggleFoldColumn(4)<cr>
+nnoremap <leader>fL :call <SID>MyToggleFoldColumn(8)<cr>
+
+nnoremap <leader>cp :CfplayToggle<cr>
+nnoremap <leader>tb :TagbarToggle<cr>
+" }}}
+
+" User info i-abbrev ---- {{{
+iabbrev @mail@ licj@sjdd.com.cn
+iabbrev @gmail@ lifeich0@gmail.com
+iabbrev @tmail@ licj14@tsinghua.org.cn
+iabbrev @ccopy@ Copyright 2018 Li Chengjie, all rights reserved.
+" }}}
+
+" Vim-plug configure ---- {{{
 call plug#begin('~/.vim/plugged')
 
 Plug 'sheerun/vim-polyglot'
@@ -25,4 +98,21 @@ Plug 'vim-scripts/taglist.vim'
 Plug 'majutsushi/tagbar'
 "Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries'}
 
+
 call plug#end()
+" }}}
+
+
+" Plugin Settings --- {{{
+
+" cfplay <lifeich1> {{{
+"let g:Cfplay_EditLayout = "tabs"
+"let g:Cfplay_YankKey = s:clip_cmd_v
+" }}}
+
+" vim-polyglot --- {{{
+let g:polyglot_disabled = ['python']
+" }}}
+
+" }}}
+
