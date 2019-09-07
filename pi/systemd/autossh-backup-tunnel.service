@@ -1,0 +1,13 @@
+[Unit]
+Description=Keeps a tunnel to 'ali' open
+After=network.target ssh.service
+Wants=network.target ssh.service
+
+[Service]
+EnvironmentFile=-/home/pi/.ssh/autossh.env
+Type=idle
+User=pi
+ExecStart=/usr/bin/autossh -M 0 -NR 0:localhost:22 -o ExitOnForwardFailure=yes -o BatchMode=yes -o TCPKeepAlive=yes root@39.105.69.3 -i /home/pi/.ssh/id_rsa
+
+[Install] 
+WantedBy=multi-user.target

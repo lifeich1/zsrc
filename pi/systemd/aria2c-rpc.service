@@ -1,0 +1,11 @@
+[Unit]
+Description=aria2 backend rpc download server
+After=network.target
+
+[Service]
+Type=idle
+User=pi
+ExecStart=aria2c --conf-path /home/pi/Code/etc/aria2/aria2.conf
+
+[Install]
+WantedBy=multi-user.target
