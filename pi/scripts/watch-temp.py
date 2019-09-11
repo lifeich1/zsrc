@@ -98,21 +98,20 @@ class Watcher(Handlers):
         self.log_cnt = 0
         self.fan_open_time = time.time()
         GPIO.setmode(GPIO.BOARD)
+        GPIO.setup(args.pin, GPIO.OUT)
         self.T = get_temp()
         self._log('on')
         self._pin_on(True)
         #GPIO.setup(args.pin, GPIO.OUT, initial=GPIO.LOW)
 
     def _pin_on(self, log=False):
-        #GPIO.output(args.pin, GPIO.LOW)
-        GPIO.setup(args.pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.output(args.pin, GPIO.LOW)
         if log:
             self.fan_open_time = time.time()
             printl('>%11d fan ON; is_weekend=%d is_night=%d' % (int(time.time()), is_weekend(), is_at_night()))
 
     def _pin_off(self, log=False):
-        #GPIO.output(args.pin, GPIO.HIGH)
-        GPIO.setup(args.pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+        GPIO.output(args.pin, GPIO.HIGH)
         if log:
             printl('<%11d fan OFF' % int(time.time()))
 
