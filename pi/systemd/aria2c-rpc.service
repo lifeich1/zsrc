@@ -5,7 +5,7 @@ After=network.target
 [Service]
 Type=idle
 User=pi
-ExecStart=aria2c --conf-path /home/pi/Code/etc/aria2/aria2.conf
+ExecStart=/usr/bin/aria2c --conf-path /home/pi/Code/etc/aria2/aria2.conf
 
 [Install]
 WantedBy=multi-user.target

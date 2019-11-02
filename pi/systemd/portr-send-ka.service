@@ -1,0 +1,9 @@
+[Unit]
+Description=Send alive message to web server
+After=network.target
+
+[Service]
+Type=idle
+User=root
+ExecStart=/home/pi/.local/bin/portr-send-ka.sh
+
