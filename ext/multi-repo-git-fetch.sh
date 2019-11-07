@@ -27,7 +27,7 @@ done
 do_fetch() {
     if [ -e "$1" ]; then
         echo "[$1]"
-        git -C $1 fetch
+        git -C "$1" fetch
     else
         echo "[Warn]: '$1' not exists"
     fi
@@ -35,7 +35,10 @@ do_fetch() {
 
 do_loop() {
     while read wdir; do
-        do_fetch $wdir
+        a="`echo $wdir | cut -f1 -d '#'`"
+        if [ "$a" ]; then
+            do_fetch "$a"
+        fi
     done
 }
 
