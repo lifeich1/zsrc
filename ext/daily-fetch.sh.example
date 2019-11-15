@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# local properties
+tool=/path/to/multi-repo-git-fetch.sh
+logf=/tmp/daily-fetch.log
+
+do_list_fetch() {
+    if [ -e "$1" ]; then
+        $tool -i "$1"
+    else
+        echo "[Warn]: list '$1' not exists"
+    fi
+}
+
+for i in \
+    "/var/git/example" \
+; do
+    do_list_fetch "$i" 2>&1 | tee -a $logf
+done
+
+echo last done at `date` >> $logf
