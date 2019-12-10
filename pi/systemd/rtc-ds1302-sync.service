@@ -1,0 +1,36 @@
+[Unit]
+Description=Sync DS1302 RTC time
+ConditionCapability=CAP_SYS_TIME
+ConditionVirtualization=!container
+DefaultDependencies=no
+After=systemd-remount-fs.service systemd-sysusers.service
+Before=time-sync.target sysinit.target shutdown.target systemd-timesyncd.service
+Conflicts=shutdown.target
+Wants=time-sync.target
+
+[Service]
+AmbientCapabilities=CAP_SYS_TIME
+CapabilityBoundingSet=CAP_SYS_TIME
+ExecStart=!!/sbin/ds1302 -slc
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+NoNewPrivileges=yes
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectControlGroups=yes
+ProtectHome=yes
+ProtectKernelModules=yes
+ProtectKernelTunables=yes
+ProtectSystem=strict
+RestrictNamespaces=yes
+RestrictRealtime=yes
+SystemCallArchitectures=native
+SystemCallErrorNumber=EPERM
+SystemCallFilter=@system-service @clock
+User=root
+Type=oneshot
+RemainAfterExit=true
+ExecStop=/sbin/ds1302 -sdsc
+
+[Install]
+WantedBy=sysinit.target

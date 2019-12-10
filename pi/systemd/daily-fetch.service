@@ -1,0 +1,8 @@
+[Unit]
+Description=Daily fetch keep up-to-date repositories (worker)
+After=network.target
+
+[Service]
+Type=idle
+User=pi
+ExecStart=/home/pi/.local/bin/daily-fetch.sh

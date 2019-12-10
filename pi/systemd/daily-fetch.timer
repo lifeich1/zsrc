@@ -1,0 +1,8 @@
+[Unit]
+Description=Daily fetch keep up-to-date repositories
+
+[Timer]
+# TODO
+
+[Install]
+WantedBy=multi-user.target
