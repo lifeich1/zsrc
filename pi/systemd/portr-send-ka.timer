@@ -3,7 +3,7 @@ Description=Every minute send alive message to web server
 
 [Timer]
 OnStartupSec=30
-OnUnitActiveSec=60
+#OnUnitActiveSec=60
 
 [Install]
 WantedBy=multi-user.target

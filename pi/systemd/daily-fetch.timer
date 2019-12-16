@@ -2,7 +2,7 @@
 Description=Daily fetch keep up-to-date repositories
 
 [Timer]
-# TODO
+OnCalendar=*-*-* 13:00:00
 
 [Install]
 WantedBy=multi-user.target

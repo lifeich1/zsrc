@@ -5,7 +5,7 @@ After=basic.target
 [Service]
 Type=idle
 User=root
-ExecStart=/home/pi/.local/bin/watch-temp.py -hi 50 -hh 62 -lo 42
+ExecStart=/home/pi/.local/bin/watch-temp.py -hi 50 -hh 65 -lo 42
 
 [Install]
 WantedBy=multi-user.target
