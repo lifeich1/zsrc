@@ -20,3 +20,7 @@ My syncthing server.
 
 My ladder server.
 
+# Badges
+
+[![typerace](https://data.typeracer.com/misc/badge?user=lintd)](https://data.typeracer.com/pit/profile?user=lintd)
+
