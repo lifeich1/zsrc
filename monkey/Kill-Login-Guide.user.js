@@ -49,10 +49,29 @@
             document.getElementById('my-dear-haruna-vm').setAttribute('hidden', true);
             return true;
         } catch (e) {
-            console.error('try to kill login guide failure', e);
-            return false;
+            try {
+                document.querySelector('iframe').contentDocument.getElementById('switch-login-guide-vm').setAttribute('hidden', true);
+                document.querySelector('iframe').contentDocument.getElementById('my-dear-haruna-vm').setAttribute('hidden', true);
+            } catch (e) {
+                console.error('try to kill login guide failure', e);
+                return false;
+            }
         }
+        return true;
     }
 
     just_one_more_check_kill();
+
+    function minute_check() {
+        try {
+            document.querySelector('iframe').contentDocument.querySelector('div#anchor-guest-box-id').setAttribute('hidden', true);
+        } catch (e) {
+            console.log('hide anchor-guest-box-id', e);
+        }
+    }
+    setTimeout(minute_check, 60 * 1000);
+    setTimeout(minute_check, 60 * 2000);
+    setTimeout(minute_check, 60 * 4000);
+    setTimeout(minute_check, 60 * 8000);
+    minute_check();
 })();
