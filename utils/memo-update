@@ -1,0 +1,49 @@
+#!/bin/bash
+
+checknpush() {
+    echo "↘️  💾 DIR: $1"
+    g="git -C $1"
+    $g status -s
+    $g commit -a -m ':memo: update'
+    $g push -v
+}
+
+gdiff() {
+    git -C $1 diff
+}
+
+travel() {
+    $1 /home/fool/Document/diend
+    $1 /home/fool/Document/practise
+}
+
+default() {
+    travel checknpush
+}
+
+showdiff() {
+    travel gdiff
+}
+
+usage() {
+    cat << EOF
+commit & push memo projects.
+
+options:
+    -n      show diff;
+    -h      show this help;
+EOF
+}
+
+while getopts "nh" opt; do
+    case $opt in
+        "n")
+            showdiff; exit 0
+            ;;
+        "h")
+            usage; exit 0
+            ;;
+    esac
+done
+
+default
