@@ -5,6 +5,7 @@ checknpush() {
     g="git -C $1"
     $g status -s
     $g commit -a -m ':memo: update'
+    $g pull -r
     $g push -v
 }
 
