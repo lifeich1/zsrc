@@ -1,0 +1,192 @@
+" Vimscript file setting ---- {{{
+augroup filtype_vim
+    autocmd!
+    autocmd FileType vim setlocal foldmethod=marker
+augroup END
+" }}}
+
+" lilypond
+filetype off
+"set runtimepath+=/home/fool/opt/lilypond-2.24.1/share/lilypond/2.24.1/vim
+
+" vimrc basic setting ---- {{{
+filetype plugin indent on
+set et
+set ts=2
+set sw=2
+set sts=-1
+set backspace=eol,start,indent
+set ruler
+set nocompatible
+set showcmd
+syntax on
+augroup py_iden
+    autocmd!
+    autocmd BufEnter *.py set ts=4 sw=4
+augroup END
+
+set fileencodings=utf-8,gbk,latin1
+set modelines=5
+set ssop-=blank
+set ssop-=localoptions
+set ssop-=options
+" }}}
+
+"mapclear
+"imapclear
+
+" vimrc basic map ---- {{{
+noremap <Up> gk
+noremap <Down> gj
+inoremap <F2> <Esc>:w<CR>a
+
+set keymap=dvorak
+" }}}
+
+let mapleader = " "
+let maplocalleader = "\\"
+
+" Funky practice ---- {{{
+nnoremap <leader>w :match Error /\ \+$/<cr>
+nnoremap <leader>W :match none<cr>
+" }}}
+
+
+" vimrc high-lv map ---- {{{
+nnoremap <leader>ev :vsplit $MYVIMRC<cr>
+nnoremap <leader>sv :source $MYVIMRC<cr>
+nnoremap <leader>es :vsplit ~/.zshrc<cr>
+
+nnoremap <leader>kj :set keymap=dvorak<cr>
+nnoremap <leader>kk :set keymap=<cr>
+nnoremap <leader>ya :%y<cr>
+
+"nnoremap <leader>fl :call <SID>MyToggleFoldColumn(4)<cr>
+"nnoremap <leader>fL :call <SID>MyToggleFoldColumn(8)<cr>
+
+nnoremap <leader>nd :execute ':packadd nerdtree \| NERDTreeToggle'<cr>
+
+nnoremap <leader>rn :RSPCNew<cr>
+nnoremap <leader>rt :RSPCAppend<cr>
+"nnoremap <leader>tt :RSPCToggleTrace<cr>
+nnoremap <leader>ra :RSPCReloadAll<cr>
+
+nnoremap <leader>t :RSPCRegTest<cr>
+nnoremap <leader>T :RSPCCustomTest<cr>
+
+nnoremap <leader>m :RSPCMake<cr>
+nnoremap <leader>fu :RSPCSubmit<cr>
+nnoremap <leader>ff :RSPCSubmit!<cr>
+
+nnoremap <leader>kd :set keymap=dvorak<cr>
+nnoremap <leader>kk :set keymap&<cr>
+" }}}
+
+" User info i-abbrev ---- {{{
+iabbrev @mail@ lintd23@outlook.com
+iabbrev @gmail@ lifeich0@gmail.com
+iabbrev @tmail@ licj14@tsinghua.org.cn
+iabbrev @ccopy@ Copyright 2022 Li Chengjie, all rights reserved.
+iabbrev <expr> @now@ strftime("%F %T %z")
+" }}}
+
+" CF set ---- {{{
+augroup cf_set
+    autocmd!
+    autocmd BufEnter ~/Code/cf/** execute "RSPCRestartCps!"
+    autocmd BufEnter ~/Code/cf/** nnoremap <buffer> <localleader>dt :RSPCDumpTest<cr>
+augroup END
+" }}}
+" CF i-abbrev ---- {{{
+iabbrev !c! #if defined(RSPC_TRACE_HINT)
+iabbrev !tt! int tt; cin >> tt; while (tt--)
+
+iabbrev !for! for (int a = 0; a < n; ++a)
+iabbrev !fori! for (int i = 0; i < n; ++i)
+
+iabbrev !l! [&](
+iabbrev !vi! std::vector<int>
+iabbrev !vi64! std::vector<int64_t>
+iabbrev !vsz! std::vector<std::size_t>
+iabbrev !bins! std::back_inserter
+iabbrev !b! .begin()
+iabbrev !e! .end()
+iabbrev !pb! .emplace_back
+
+iabbrev !iit! std::istream_iterator
+iabbrev !iiti! std::istream_iterator<int>(std::cin)
+iabbrev !iiti64! std::istream_iterator<int64_t>(std::cin)
+iabbrev !iits! std::istream_iterator<std::string>(std::cin)
+iabbrev !oit! std::ostream_iterator
+iabbrev !oiti! std::ostream_iterator<int>(std::cout, " ")
+iabbrev !oiti64! std::ostream_iterator<int64_t>(std::cout, " ")
+iabbrev !oitsz! std::ostream_iterator<std::size_t>(std::cout, " ")
+iabbrev !oits! std::ostream_iterator<std::string>(std::cout, " ")
+" }}}
+
+function! s:MinpacPrepare() abort
+  packadd minpac
+  call minpac#init()
+  call minpac#add('k-takata/minpac', {'type': 'opt'})
+
+  " minpac managing plugins {{{
+  call minpac#add('henriquehbr/nvim-startup.lua', {'type': 'opt'})
+  call minpac#add('dstein64/vim-startuptime', {'type': 'opt'})
+  call minpac#add('junegunn/fzf')
+  call minpac#add('junegunn/fzf.vim')
+  call minpac#add('sheerun/vim-polyglot')
+  "call minpac#add('vim-scripts/taglist.vim')
+  "call minpac#add('majutsushi/tagbar')
+  call minpac#add('preservim/nerdtree', {'type': 'opt'})
+  "call minpac#add('skywind3000/asyncrun.vim')
+  call minpac#add('junegunn/seoul256.vim')
+  call minpac#add('mhinz/vim-grepper', {'type': 'opt'})
+  call minpac#add('radenling/vim-dispatch-neovim')
+  call minpac#add('tpope/vim-dispatch')
+  call minpac#add('tpope/vim-obsession')
+  call minpac#add('tpope/vim-projectionist')
+  call minpac#add('neovim/nvim-lspconfig')
+  call minpac#add('williamboman/nvim-lsp-installer', {'type': 'opt'})
+  call minpac#add('jlanzarotta/bufexplorer')
+  " }}}
+endfunction
+
+command! PkgUpd call s:MinpacPrepare() | call minpac#update()
+command! PkgCl call s:MinpacPrepare() | call minpac#clean()
+command! PkgSt call s:MinpacPrepare() | call minpac#status()
+
+" fzf fold settings {{{
+let g:fzf_buffers_jump = 1
+"let g:fzf_tags_command = 'exctags -a'
+" }}}
+nnoremap <leader>o :Files<CR>
+nnoremap <leader>zt :BTags<CR>
+nnoremap <leader>zT :Tags<CR>
+nnoremap <leader>zb :Buffers<CR>
+nnoremap <leader>zw :Windows<CR>
+nnoremap <leader>zd :GFiles?<CR>
+
+nnoremap <M-h> <C-w><C-h>
+nnoremap <M-j> <C-w><C-j>
+nnoremap <M-k> <C-w><C-k>
+nnoremap <M-l> <C-w><C-l>
+inoremap <M-h> <Esc><C-w><C-h>
+inoremap <M-j> <Esc><C-w><C-j>
+inoremap <M-k> <Esc><C-w><C-k>
+inoremap <M-l> <Esc><C-w><C-l>
+nnoremap <M--> gT
+nnoremap <M-=> gt
+inoremap <M--> <Esc>gT
+inoremap <M-=> <Esc>gt
+nnoremap <M-_> :-tabmove<CR>
+nnoremap <M-+> :+tabmove<CR>
+inoremap <M-_> <Esc>:-tabmove<CR>
+inoremap <M-+> <Esc>:+tabmove<CR>
+
+command Tclr2m execute tabpagenr()+1 . ",$tabdo tabcl"
+
+
+colo seoul256
+if ! $SSH_CLIENT
+    highlight Normal ctermfg=none ctermbg=none
+endif
