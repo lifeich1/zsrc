@@ -1,0 +1,8 @@
+[Unit]
+Description=Daily pull git repo backup tarball (worker)
+After=network.target
+
+[Service]
+Type=idle
+User=pi
+ExecStart=/home/pi/.local/bin/pull-git-bak.sh
