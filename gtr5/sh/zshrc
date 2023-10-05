@@ -108,10 +108,15 @@ export CROSS_CONTAINER_ENGINE=podman
 # For a full list of active aliases, run `alias`.
 #
 # Example aliases
-alias zshconfig="vim ~/.zshrc"
+addfunc_=(
+    zshconfig "vim ~/.zshrc"
+    pxy-yt-dlp "yt-dlp --proxy socks5://my-pi:10809"
+    git-alias "view ~/.oh-my-zsh/plugins/git/README.md"
+)
+#alias zshconfig="vim ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-alias pxy-yt-dlp="yt-dlp --proxy socks5://my-pi:10809"
-alias git-alias="view ~/.oh-my-zsh/plugins/git/README.md"
+#alias pxy-yt-dlp="yt-dlp --proxy socks5://my-pi:10809"
+#alias git-alias="view ~/.oh-my-zsh/plugins/git/README.md"
 
 function alarmsleep() {
     date
@@ -137,13 +142,25 @@ function cfsm() {
 }
 
 
-alias vim='nvim'
+addfunc_+=(vim "nvim")
 if [ -z "$NVIM" ]; then
     VISUAL='nvim'
-    alias nvim='nvim.appimage'
+    function nvim() {
+        if [ -f ./Session.vim ]; then
+            nvim.appimage -S ./Session.vim $@
+        else
+            nvim.appimage $@
+        fi
+    }
 else
     VISUAL="nvr --remote-tab-wait +'set bufhidden=wipe'"
-    alias nvim='nvr'
+    addfunc_+=(nvim "nvr")
 fi
 
 
+function {
+  while [ $# -ge 2 ]; do
+    eval "function $1() { $2 \$@; }"
+    shift 2
+  done
+} $addfunc_; unset addfunc_
