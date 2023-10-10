@@ -21,8 +21,19 @@ lspconfig.rust_analyzer.setup {
   -- Server-specific settings. See `:help lspconfig-setup`
   settings = {
     ['rust-analyzer'] = {
-      ["rust-analyzer.cargo.loadOutDirsFromCheck"] = true,
-      ["rust-analyzer.procMacro.enable"] = true,
+      cargo = {
+        loadOutDirsFromCheck = true,
+      },
+      procMacro = {
+        enable = true,
+      },
+      check = {
+        command = "clippy",
+        extraArgs = { "--", "-D", "warnings", "-W", "clippy::pedantic", "-W", "clippy::nursery", "-W", "rust-2018-idioms" },
+      },
+      -- ["rust-analyzer.cargo.loadOutDirsFromCheck"] = true,
+      -- ["rust-analyzer.procMacro.enable"] = true,
+      -- ["rust-analyzer.check.command"] = "clippy",
     },
   },
 }
@@ -106,3 +117,8 @@ vim.api.nvim_create_autocmd('LspAttach', {
     end
   end,
 })
+
+require("coverage").setup()
+vim.keymap.set('n', '<Space>cv', function()
+  vim.cmd('Coverage')
+end)

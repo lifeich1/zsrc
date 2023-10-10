@@ -145,9 +145,12 @@ function! s:MinpacPrepare() abort
   call minpac#add('tpope/vim-dispatch')
   call minpac#add('tpope/vim-obsession')
   call minpac#add('tpope/vim-projectionist')
+  call minpac#add('tpope/vim-fugitive')
   call minpac#add('neovim/nvim-lspconfig')
   call minpac#add('williamboman/nvim-lsp-installer', {'type': 'opt'})
   call minpac#add('jlanzarotta/bufexplorer')
+  call minpac#add('nvim-lua/plenary.nvim')
+  call minpac#add('andythigpen/nvim-coverage')
   " }}}
 endfunction
 
@@ -165,6 +168,7 @@ nnoremap <leader>zT :Tags<CR>
 nnoremap <leader>zb :Buffers<CR>
 nnoremap <leader>zw :Windows<CR>
 nnoremap <leader>zd :GFiles?<CR>
+nnoremap <leader>gg :execute ":packadd vim-grepper \| Grepper"<CR>
 
 nnoremap <M-h> <C-w><C-h>
 nnoremap <M-j> <C-w><C-j>
