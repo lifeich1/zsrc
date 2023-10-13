@@ -146,8 +146,8 @@ addfunc_+=(vim "nvim")
 if [ -z "$NVIM" ]; then
     VISUAL='nvim'
     function nvim() {
-        if [ -f ./Session.vim ]; then
-            nvim.appimage -S ./Session.vim $@
+        if [ \( $# -eq 0 \) -a \( -f ./Session.vim \) ]; then
+            nvim.appimage -S ./Session.vim
         else
             nvim.appimage $@
         fi

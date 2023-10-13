@@ -3,6 +3,11 @@ augroup filtype_vim
     autocmd!
     autocmd FileType vim setlocal foldmethod=marker
 augroup END
+augroup git_commit
+    autocmd!
+    autocmd BufEnter COMMIT_EDITMSG nnoremap <localleader>gm :Gmoji<cr>
+    autocmd BufEnter COMMIT_EDITMSG inoremap <C-j> <Esc>:Gmoji<cr>
+augroup END
 " }}}
 
 " lilypond
@@ -194,3 +199,6 @@ colo seoul256
 if ! $SSH_CLIENT
     highlight Normal ctermfg=none ctermbg=none
 endif
+highlight CoverageCovered ctermfg=green
+highlight CoverageUncovered ctermfg=darkred
+highlight CoveragePartial ctermfg=lightblue

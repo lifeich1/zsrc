@@ -118,7 +118,11 @@ vim.api.nvim_create_autocmd('LspAttach', {
   end,
 })
 
-require("coverage").setup()
-vim.keymap.set('n', '<Space>cv', function()
-  vim.cmd('Coverage')
-end)
+require("coverage").setup({
+  lang = {
+    rust = {
+      coverage_command = "cargo run -r -q --package xtask -- coverage --neo",
+      project_files_only = false,
+    },
+  },
+})
