@@ -35,6 +35,10 @@ set modelines=5
 set ssop-=blank
 set ssop-=localoptions
 set ssop-=options
+set foldlevel=99
+set foldenable
+set foldcolumn=1
+set foldlevelstart=99
 " }}}
 
 "mapclear
@@ -156,6 +160,8 @@ function! s:MinpacPrepare() abort
   call minpac#add('jlanzarotta/bufexplorer')
   call minpac#add('nvim-lua/plenary.nvim')
   call minpac#add('andythigpen/nvim-coverage')
+  call minpac#add('kevinhwang91/promise-async')
+  call minpac#add('kevinhwang91/nvim-ufo')
   " }}}
 endfunction
 

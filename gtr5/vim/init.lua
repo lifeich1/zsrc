@@ -1,23 +1,29 @@
 -- require("nvim-lsp-installer").setup {}
+local capabilities = vim.lsp.protocol.make_client_capabilities()
+capabilities.textDocument.foldingRange = {
+  dynamicRegistration = false,
+  lineFoldingOnly = true
+}
 
 local lspconfig = require('lspconfig')
 ---[[
 -- vscode extracted
-lspconfig.jsonls.setup {}
-lspconfig.html.setup {}
-lspconfig.cssls.setup {}
-
-lspconfig.pylsp.setup {}
-lspconfig.bashls.setup {}
-lspconfig.eslint.setup {}
-lspconfig.vimls.setup {}
+-- lspconfig.jsonls.setup {}
+-- lspconfig.html.setup {}
+-- lspconfig.cssls.setup {}
+--
+-- lspconfig.pylsp.setup {}
+-- lspconfig.bashls.setup {}
+-- lspconfig.eslint.setup {}
+-- lspconfig.vimls.setup {}
 --]]
 
-lspconfig.marksman.setup {}
+-- lspconfig.marksman.setup {}
 
-lspconfig.clangd.setup {}
-lspconfig.perlpls.setup {}
+-- lspconfig.clangd.setup {}
+-- lspconfig.perlpls.setup {}
 lspconfig.rust_analyzer.setup {
+  capabilities = capabilities,
   -- Server-specific settings. See `:help lspconfig-setup`
   settings = {
     ['rust-analyzer'] = {
@@ -38,6 +44,7 @@ lspconfig.rust_analyzer.setup {
   },
 }
 lspconfig.lua_ls.setup {
+  capabilities = capabilities,
   settings = {
     Lua = {
       runtime = {
@@ -91,7 +98,7 @@ vim.api.nvim_create_autocmd('LspAttach', {
     local opts = { buffer = ev.buf }
     vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, opts)
     vim.keymap.set('n', 'gd', vim.lsp.buf.definition, opts)
-    vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
+    --vim.keymap.set('n', 'K', vim.lsp.buf.hover, opts)
     vim.keymap.set('n', '<Bslash>i', vim.lsp.buf.implementation, opts)
     vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, opts)
     vim.keymap.set('n', '<Bslash>wa', vim.lsp.buf.add_workspace_folder, opts)
@@ -126,3 +133,42 @@ require("coverage").setup({
     },
   },
 })
+
+-- local language_servers = require("lspconfig").util.available_servers() -- or list servers manually like {'gopls', 'clangd'}
+local language_servers = {
+  'jsonls', 'html', 'cssls', 'pylsp', 'bashls',
+  'eslint', 'vimls', 'marksman', 'clangd',
+  'perlpls' }
+for _, ls in ipairs(language_servers) do
+  require('lspconfig')[ls].setup({
+    capabilities = capabilities
+    -- you can add other fields for setting up lsp server in this table
+  })
+end
+require('ufo').setup({
+  preview = {
+    win_config = {
+      border = { '', '─', '', '', '', '─', '', '' },
+      winhighlight = 'Normal:Folded',
+      winblend = 0
+    },
+    mappings = {
+      scrollU = '<C-u>',
+      scrollD = '<C-d>',
+      jumpTop = '[',
+      jumpBot = ']'
+    }
+  },
+})
+
+vim.keymap.set('n', 'zR', require('ufo').openAllFolds)
+vim.keymap.set('n', 'zM', require('ufo').closeAllFolds)
+vim.keymap.set('n', 'zr', require('ufo').openFoldsExceptKinds)
+vim.keymap.set('n', 'zm', require('ufo').closeFoldsWith) -- closeAllFolds == closeFoldsWith(0)
+vim.keymap.set('n', 'K', function()
+  local winid = require('ufo').peekFoldedLinesUnderCursor()
+  if not winid then
+    -- choose one of coc.nvim and nvim lsp
+    vim.lsp.buf.hover()
+  end
+end)
