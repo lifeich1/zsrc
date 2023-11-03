@@ -70,6 +70,8 @@ nnoremap <leader>kj :set keymap=dvorak<cr>
 nnoremap <leader>kk :set keymap=<cr>
 nnoremap <leader>ya :%y<cr>
 
+nnoremap <leader>c5 :let @+=@%<cr>
+
 "nnoremap <leader>fl :call <SID>MyToggleFoldColumn(4)<cr>
 "nnoremap <leader>fL :call <SID>MyToggleFoldColumn(8)<cr>
 
@@ -139,6 +141,8 @@ function! s:MinpacPrepare() abort
   call minpac#add('k-takata/minpac', {'type': 'opt'})
 
   " minpac managing plugins {{{
+  call minpac#add('catppuccin/nvim', {'name': 'catppuccin-nvim', 'type': 'opt'})
+  call minpac#add('morhetz/gruvbox', {'type': 'opt'})
   call minpac#add('henriquehbr/nvim-startup.lua', {'type': 'opt'})
   call minpac#add('dstein64/vim-startuptime', {'type': 'opt'})
   call minpac#add('junegunn/fzf')
@@ -148,7 +152,7 @@ function! s:MinpacPrepare() abort
   "call minpac#add('majutsushi/tagbar')
   call minpac#add('preservim/nerdtree', {'type': 'opt'})
   "call minpac#add('skywind3000/asyncrun.vim')
-  call minpac#add('junegunn/seoul256.vim')
+  call minpac#add('junegunn/seoul256.vim', {'type': 'opt'})
   call minpac#add('mhinz/vim-grepper', {'type': 'opt'})
   call minpac#add('radenling/vim-dispatch-neovim')
   call minpac#add('tpope/vim-dispatch')
@@ -201,9 +205,14 @@ inoremap <M-+> <Esc>:+tabmove<CR>
 command Tclr2m execute tabpagenr()+1 . ",$tabdo tabcl"
 
 
-colo seoul256
-if ! $SSH_CLIENT
+if has('nvim')
+  "colo catppuccin
+else
+  let g:gruvbox_contrast_dark='soft'
+  colo gruvbox
+  if ! $SSH_CLIENT
     highlight Normal ctermfg=none ctermbg=none
+  endif
 endif
 highlight CoverageCovered ctermfg=green
 highlight CoverageUncovered ctermfg=darkred

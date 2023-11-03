@@ -172,3 +172,18 @@ vim.keymap.set('n', 'K', function()
     vim.lsp.buf.hover()
   end
 end)
+
+require("catppuccin").setup({
+  flavour = "frappe",
+  transparent_background = true,
+  term_colors = true,
+  highlight_overrides = {
+    all = function(colors)
+      return {
+        StatusLine = { bg = colors.mantle },
+        StatusLineNC = { bg = colors.crust },
+      }
+    end,
+  },
+})
+vim.cmd.colorscheme "catppuccin"

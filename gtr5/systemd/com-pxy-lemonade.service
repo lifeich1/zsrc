@@ -1,0 +1,9 @@
+[Unit]
+Description=Proxy lemonade to com desktop computer.
+
+[Service]
+Type=idle
+ExecStart=/home/fool/Code/hub/zsrc/gtr5/sh/com-pxy-lemonade.sh
+RestartSec=60s
+Restart=always
+

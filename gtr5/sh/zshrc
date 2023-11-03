@@ -119,6 +119,8 @@ addfunc_=(
     zshconfig "vim ~/.zshrc"
     pxy-yt-dlp "yt-dlp --proxy socks5://my-pi:10809"
     git-alias "view ~/.oh-my-zsh/plugins/git/README.md"
+    com-lmon "systemctl --user restart com-pxy-lemonade.service"
+    st-lmon "systemctl --user status com-pxy-lemonade.service"
 )
 #alias zshconfig="vim ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"

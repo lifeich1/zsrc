@@ -1,8 +1,12 @@
+let g:polyglot_disabled = ['autoindent']
+
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 source ~/.vimrc
 
 "tmapclear
+
+"set timeoutlen=50
 
 let g:clipboard = {
       \   'name': 'xsel',
