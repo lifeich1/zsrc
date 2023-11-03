@@ -104,8 +104,15 @@ iabbrev <expr> @now@ strftime("%F %T %z")
 " CF set ---- {{{
 augroup cf_set
     autocmd!
-    autocmd BufEnter ~/Code/cf/** execute "RSPCRestartCps!"
-    autocmd BufEnter ~/Code/cf/** nnoremap <buffer> <localleader>dt :RSPCDumpTest<cr>
+    function! s:do_cf_set()
+      if get(b:, "cf_set_done", 0)
+        return
+      endif
+      let b:cf_set_done = 1
+      execute "RSPCRestartCps!"
+      nnoremap <buffer> <localleader>dt :RSPCDumpTest<cr>
+    endfunction
+    autocmd BufEnter ~/Code/cf/** call s:do_cf_set()
 augroup END
 " }}}
 " CF i-abbrev ---- {{{
