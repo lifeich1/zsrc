@@ -121,6 +121,7 @@ addfunc_=(
     git-alias "view ~/.oh-my-zsh/plugins/git/README.md"
     com-lmon "systemctl --user restart com-pxy-lemonade.service"
     st-lmon "systemctl --user status com-pxy-lemonade.service"
+    gh-cl "cd /home/fool/Code/z/github.com && mkdir \$(dirname \$1) && cd \$(dirname \$1) && gh repo clone"
 )
 #alias zshconfig="vim ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"

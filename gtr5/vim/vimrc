@@ -5,7 +5,7 @@ augroup filtype_vim
 augroup END
 augroup git_commit
     autocmd!
-    autocmd BufEnter COMMIT_EDITMSG nnoremap <localleader>gm :Gmoji<cr>
+    autocmd BufEnter COMMIT_EDITMSG nnoremap <leader>j :Gmoji<cr>
     autocmd BufEnter COMMIT_EDITMSG inoremap <C-j> <Esc>:Gmoji<cr>
 augroup END
 " }}}
