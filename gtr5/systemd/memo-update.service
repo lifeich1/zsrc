@@ -1,0 +1,8 @@
+[Unit]
+Description=memo git sync update
+After=org.gnome.Shell.target
+
+[Service]
+ExecStart=/home/fool/bin/memo-update
+
+

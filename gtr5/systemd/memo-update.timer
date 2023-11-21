@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily trigger memo-update
+
+[Timer]
+OnCalendar=daily
+
+[Install]
+WantedBy=timers.target
+
+
