@@ -165,6 +165,7 @@ if [ -z "$NVIM" ]; then
 else
     VISUAL="nvr --remote-tab-wait +'set bufhidden=wipe'"
     addfunc_+=(nvim "nvr")
+    addfunc_+=(vd 'nvr -c "lcd $(pwd)"')
 fi
 
 
