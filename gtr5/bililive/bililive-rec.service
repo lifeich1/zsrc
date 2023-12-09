@@ -1,0 +1,9 @@
+[Unit]
+Description=Bililive recoder from rec.danmuji.org
+
+[Service]
+Type=idle
+ExecStart=docker compose -f /home/fool/Code/hub/zsrc/gtr5/bililive/docker-compose.yml up
+
+[Install]
+WantedBy=default.target

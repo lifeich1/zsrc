@@ -1,0 +1,14 @@
+version: "3.8"
+services:
+  recorder:
+    image: bililive/recorder:latest
+    restart: unless-stopped
+    volumes:
+      - type: bind
+        source: /home/fool/Videos/dl/rec
+        target: /rec
+    ports:
+      - "2356:2356"
+    environment:
+      - BREC_HTTP_BASIC_USER=fool
+      - BREC_HTTP_BASIC_PASS=dpkgdpkg
