@@ -126,7 +126,7 @@ iabbrev !l! [&](
 iabbrev !vi! std::vector<int>
 iabbrev !vi64! std::vector<int64_t>
 iabbrev !vsz! std::vector<std::size_t>
-iabbrev !bins! std::back_inserter
+iabbrev !bins! std::back_inserter()
 iabbrev !b! .begin()
 iabbrev !e! .end()
 iabbrev !pb! .emplace_back
