@@ -77,7 +77,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git gitignore gh ubuntu emoji emoji-clock cp rust perl)
+plugins=(git gitignore gh ubuntu emoji emoji-clock cp rust perl zellij poetry)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -122,7 +122,17 @@ addfunc_=(
     com-lmon "systemctl --user restart com-pxy-lemonade.service"
     st-lmon "systemctl --user status com-pxy-lemonade.service"
     gh-cl "cd /home/fool/Code/z/github.com && mkdir \$(dirname \$1) && cd \$(dirname \$1) && gh repo clone"
+    du "dust"
+    cheat "docker run --rm bannmann/docker-cheat"
+    cat "bat"
 )
+faddfunc_=(
+  ll "ls -laahHg"
+  l "ls -lhHg"
+  la "ls -aa"
+  gsh "git show --ext-diff"
+)
+alias ls='eza'
 #alias zshconfig="vim ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 #alias pxy-yt-dlp="yt-dlp --proxy socks5://my-pi:10809"
@@ -151,6 +161,37 @@ function cfsm() {
     bash -c $cm
 }
 
+function upd_nvim() {
+  if [ $# -ne 1 ]; then
+    echo "require version number, like 0.9.5"
+    return 1
+  fi
+  oldpwd=$(pwd)
+  cd $HOME/opt
+  proxychains wget https://github.com/neovim/neovim/releases/download/v$1/nvim.appimage \
+    -O ./nvim.appimage.$1 && \
+    chmod +x ./nvim.appimage.$1 && \
+    rm nvim.appimage && \
+    ln -s ./nvim.appimage.$1 nvim.appimage && \
+    echo "done."
+  nvim --version
+  cd $oldpwd
+}
+
+function za() {
+  sess=$(zellij ls|fzf --ansi|cut -d ' ' -f 1)
+  if [ -z "$sess" ]; then
+    echo "Selected NO session."
+    return 1
+  fi
+  echo $sess
+  if [ $# -eq 1 ]; then
+    zellij $1 $sess
+  else
+    zellij a $sess
+  fi
+}
+
 
 addfunc_+=(vim "nvim")
 if [ -z "$NVIM" ]; then
@@ -175,6 +216,13 @@ function {
     shift 2
   done
 } $addfunc_; unset addfunc_
+function {
+  while [ $# -ge 2 ]; do
+    unalias $1
+    eval "function $1() { $2 \$@; }"
+    shift 2
+  done
+} $faddfunc_; unset faddfunc_
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
