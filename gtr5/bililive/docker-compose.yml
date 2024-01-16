@@ -5,7 +5,8 @@ services:
     restart: unless-stopped
     volumes:
       - type: bind
-        source: /home/fool/Videos/dl/rec
+        #source: /home/fool/Videos/dl/rec
+        source: /media/fool/ChangJiang/bilirec
         target: /rec
     ports:
       - "2356:2356"
