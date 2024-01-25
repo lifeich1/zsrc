@@ -116,14 +116,15 @@ export CROSS_CONTAINER_ENGINE=podman
 #
 # Example aliases
 addfunc_=(
-    zshcf "vim ~/.zshrc"
+    cfzsh "vim ~/.zshrc"
+    cfssh "vim ~/.ssh/config"
     pxy-yt-dlp "yt-dlp --proxy socks5://my-pi:10809"
     git-alias "view ~/.oh-my-zsh/plugins/git/README.md"
     com-lmon "systemctl --user restart com-pxy-lemonade.service"
     st-lmon "systemctl --user status com-pxy-lemonade.service"
     gh-cl "cd /home/fool/Code/z/github.com && mkdir \$(dirname \$1) && cd \$(dirname \$1) && gh repo clone"
     du "dust"
-    cheat "docker run --rm bannmann/docker-cheat"
+    #cheat "docker run --rm bannmann/docker-cheat"
     cat "bat"
 )
 faddfunc_=(
@@ -175,6 +176,23 @@ function upd_nvim() {
     ln -s ./nvim.appimage.$1 nvim.appimage && \
     echo "done."
   nvim --version
+  cd $oldpwd
+}
+function upd_cheat() {
+  if [ $# -ne 1 ]; then
+    echo "require version number, like 4.4.2"
+    return 1
+  fi
+  oldpwd=$(pwd)
+  cd $HOME/opt
+  proxychains wget https://github.com/cheat/cheat/releases/download/$1/cheat-linux-amd64.gz \
+    -O cheat-linux-amd64.$1.gz && \
+    gzip -d cheat-linux-amd64.$1.gz && \
+    chmod +x cheat-linux-amd64.$1 && \
+    rm -f cheat-linux-amd64 && \
+    ln -s ./cheat-linux-amd64.$1 cheat-linux-amd64 && \
+    echo "done."
+  cheat --version
   cd $oldpwd
 }
 
