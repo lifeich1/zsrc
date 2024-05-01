@@ -145,7 +145,8 @@ iabbrev !oits! std::ostream_iterator<std::string>(std::cout, " ")
 function! s:MinpacPrepare() abort
   packadd minpac
   call minpac#init()
-  call minpac#add('k-takata/minpac', {'type': 'opt'})
+  " manage by nix
+  "call minpac#add('k-takata/minpac', {'type': 'opt'})
 
   " minpac managing plugins {{{
   call minpac#add('catppuccin/nvim', {'name': 'catppuccin-nvim', 'type': 'opt'})

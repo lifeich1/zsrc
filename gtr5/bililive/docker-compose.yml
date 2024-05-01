@@ -6,7 +6,7 @@ services:
     volumes:
       - type: bind
         #source: /home/fool/Videos/dl/rec
-        source: /media/fool/ChangJiang/bilirec
+        source: /media/fool/ChangJiangR/bilirec
         target: /rec
     ports:
       - "2356:2356"

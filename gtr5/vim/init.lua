@@ -18,6 +18,16 @@ local lspconfig = require('lspconfig')
 -- lspconfig.vimls.setup {}
 --]]
 
+lspconfig.nil_ls.setup {
+  settings = {
+    ['nil'] = {
+      formatting = {
+        command = { "nixpkgs-fmt" },
+      },
+    },
+  },
+}
+-- lspconfig.statix.setup {}
 -- lspconfig.marksman.setup {}
 
 -- lspconfig.clangd.setup {}

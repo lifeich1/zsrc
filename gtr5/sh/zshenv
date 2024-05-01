@@ -1,39 +1,52 @@
-export GEM_HOME="$HOME/opt/gems"
-export PATH="$HOME/opt/gems/bin:$PATH"
-export PERLBREW_ROOT="$HOME/opt/perl5/perlbrew"
+if [ -d "$HOME/opt/gems" ]; then
+  export GEM_HOME="$HOME/opt/gems"
+  export PATH="$HOME/opt/gems/bin:$PATH"
+fi
 
-. "$HOME/.cargo/env"
-source ~/opt/perl5/perlbrew/etc/bashrc
+if [ -d $HOME/.cargo ]; then
+  . "$HOME/.cargo/env"
+fi
 
-eval "$(perl -I$HOME/opt/perl5/lib/perl5 -Mlocal::lib=$HOME/opt/perl5)"
-export PERL5LIB="$HOME/opt/perl5/lib/perl5";
-export PATH="$HOME/opt/perl5/bin:$PATH";
-export PERL_LOCAL_LIB_ROOT="$HOME/opt/perl5:$PERL_LOCAL_LIB_ROOT";
+if [ -d $HOME/opt/perl5/perlbrew ]; then
+  export PERLBREW_ROOT="$HOME/opt/perl5/perlbrew"
+  source ~/opt/perl5/perlbrew/etc/bashrc
+
+  eval "$(perl -I$HOME/opt/perl5/lib/perl5 -Mlocal::lib=$HOME/opt/perl5)"
+  export PERL5LIB="$HOME/opt/perl5/lib/perl5";
+  export PATH="$HOME/opt/perl5/bin:$PATH";
+  export PERL_LOCAL_LIB_ROOT="$HOME/opt/perl5:$PERL_LOCAL_LIB_ROOT";
+fi
 
 export RUSTUP_UPDATE_ROOT=https://mirrors.tuna.tsinghua.edu.cn/rustup/rustup
 export RUSTUP_DIST_SERVER=https://mirrors.tuna.tsinghua.edu.cn/rustup
 
-NODE_ROOT=$(npm config get prefix)
-export PATH="$NODE_ROOT/bin:$PATH"
-export MANPATH="$MANPATH:$NODE_ROOT/share/man"
+if which npm >/dev/null; then
+  NODE_ROOT=$(npm config get prefix)
+  export PATH="$NODE_ROOT/bin:$PATH"
+  export MANPATH="$MANPATH:$NODE_ROOT/share/man"
+fi
 
-export PATH=$PATH:/usr/local/go/bin
+if [ -d /usr/local/go ]; then
+  export PATH=$PATH:/usr/local/go/bin
+fi
 
 export GPG_TTY=$(tty)
 
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-__conda_setup="$('/home/fool/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-if [ $? -eq 0 ]; then
+if [ -d /home/fool/opt/miniconda3 ]; then
+  # >>> conda initialize >>>
+  # !! Contents within this block are managed by 'conda init' !!
+  __conda_setup="$('/home/fool/opt/miniconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+  if [ $? -eq 0 ]; then
     eval "$__conda_setup"
-else
+  else
     if [ -f "/home/fool/opt/miniconda3/etc/profile.d/conda.sh" ]; then
-        . "/home/fool/opt/miniconda3/etc/profile.d/conda.sh"
+      . "/home/fool/opt/miniconda3/etc/profile.d/conda.sh"
     else
-        export PATH="/home/fool/opt/miniconda3/bin:$PATH"
+      export PATH="/home/fool/opt/miniconda3/bin:$PATH"
     fi
+  fi
+  unset __conda_setup
+  # <<< conda initialize <<<
 fi
-unset __conda_setup
-# <<< conda initialize <<<
 
 if [ -e /home/fool/.nix-profile/etc/profile.d/nix.sh ]; then . /home/fool/.nix-profile/etc/profile.d/nix.sh; fi # added by Nix installer
