@@ -5,8 +5,8 @@
 # wlan_password="12345678"
 #
 
-root_password="opizero3"
-lan_ip_address="192.168.3.13"
+root_password="opione-pass"
+lan_ip_address="192.168.3.60"
 
 # pppoe_username=""
 # pppoe_password=""
@@ -24,7 +24,7 @@ if [ -n "$lan_ip_address" ]; then
   uci set network.lan.ipaddr="$lan_ip_address"
   uci set network.lan.gateway="192.168.3.1"
   uci set dhcp.lan.ignore="1"
-  uci set network.lan.dns="8.8.8.8 8.8.4.4 192.168.10.1"
+  uci set network.lan.dns="8.8.8.8 8.8.4.4 192.168.3.1"
   uci commit network
 fi
 
