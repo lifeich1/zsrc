@@ -5,7 +5,7 @@
 # wlan_password="12345678"
 #
 
-root_password="opione-pass"
+root_password="opiz3-pass"
 lan_ip_address="192.168.3.60"
 
 # pppoe_username=""
