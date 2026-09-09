@@ -1,0 +1,21 @@
+{
+  "target_kcal": 2000,
+  "macro_targets": {
+    "protein_g": 120,
+    "fat_g": 65,
+    "carb_g": 220
+  },
+  "weight_target_kg": null,
+  "meals": [
+    "breakfast",
+    "lunch",
+    "dinner",
+    "snack"
+  ],
+  "meal_labels": {
+    "breakfast": "早餐",
+    "lunch": "午餐",
+    "dinner": "晚餐",
+    "snack": "加餐"
+  }
+}

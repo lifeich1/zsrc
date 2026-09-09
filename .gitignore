@@ -7,3 +7,6 @@ Session.vim
 *~
 *.bak
 *.swp
+
+__pycache__/
+*.py[cod]

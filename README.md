@@ -7,6 +7,7 @@ simple scripts collection.
 1. [deb](#deb)
 1. [st](#st)
 1. [v0](#v0)
+1. [calory](#calory)
 
 ## deb
 
@@ -19,6 +20,10 @@ My syncthing server.
 ## v0
 
 My ladder server.
+
+## calory
+
+Daily menu tracking and calorie counting. See [calory/README.md](calory/README.md).
 
 # Badges
 
