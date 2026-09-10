@@ -37,6 +37,7 @@ class Food:
     grams: float | None = None
     aliases: list[str] = field(default_factory=list)
     source: str = ""
+    notes: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)

@@ -48,7 +48,7 @@ config ──> store, models
 | 需求 | 改动点 |
 | --- | --- |
 | 新增子命令 | `cli.py` 写 `_handle_xxx(args)` + `_register_xxx(sub)`，并在 `build_parser()` 注册；出错统一 `_fail(msg)` 返回 1 |
-| 新增食物字段 | `models.Food` 加带默认值的字段 → `foods._coerce()` 校验 → 需要时在 `foods.compute_entry()` 使用；旧 `foods.json` 不必改 |
+| 新增食物字段 | `models.Food` 加带默认值的字段 → `foods._coerce()` 校验 → 需要时在 `foods.compute_entry()` 使用；旧 `foods.json` 不必改；`cli._handle_food_add` 加参数 |
 | 新增/改名餐次 | 只改 `config.json` 的 `meals` / `meal_labels`；`Config.resolve_meal()` 自动支持中文标签与唯一前缀 |
 | 调整报表格式 | 只改 `report.py`；`cli.py` 不拼报表文案 |
 | 调整目标或达标口径 | `config.json` + `report.ON_TARGET_TOLERANCE` |

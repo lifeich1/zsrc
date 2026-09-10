@@ -275,6 +275,7 @@ def build_food(
     grams: float | None = None,
     aliases: list[str] | None = None,
     source: str = "",
+    notes: str = "",
     food_id: str | None = None,
 ) -> Food:
     """构造一条食物数据（不落盘）。"""
@@ -293,6 +294,7 @@ def build_food(
             grams=None if grams is None else float(grams),
             aliases=list(aliases or []),
             source=source,
+            notes=notes,
         )
     )
 

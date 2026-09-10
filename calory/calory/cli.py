@@ -49,7 +49,8 @@ def _food_summary(food: Food) -> str:
         f"碳水 {_num(food.carb_g)}g"
     )
     source = f" [{food.source}]" if food.source else ""
-    return f"{food.name}（{food.id}） {portion}：{_num(food.kcal)} kcal，{macros}{source}"
+    notes = f" — {food.notes}" if food.notes else ""
+    return f"{food.name}（{food.id}） {portion}：{_num(food.kcal)} kcal，{macros}{source}{notes}"
 
 
 def _match_all(keyword: str, library: list[Food]) -> list[Food]:
@@ -94,6 +95,10 @@ def _handle_food_search(args: argparse.Namespace) -> int:
 
 
 def _handle_food_add(args: argparse.Namespace) -> int:
+    source = (args.source or "").strip()
+    notes = (args.notes or "").strip()
+    if source == "估算" and not notes:
+        return _fail("source=估算 时必须提供 --notes 说明估算依据（如「按瘦肉 100g + 油 15g 加权」）")
     library = foods.load_foods()
     try:
         per, unit = foods.parse_amount(args.per)
@@ -110,7 +115,8 @@ def _handle_food_add(args: argparse.Namespace) -> int:
             carb_g=args.carb,
             grams=args.grams,
             aliases=args.alias,
-            source=args.source,
+            source=source,
+            notes=notes,
             food_id=args.id,
         )
     except ValueError as exc:
@@ -147,6 +153,7 @@ def _register_food(sub: argparse._SubParsersAction) -> None:
     add_parser.add_argument("--grams", type=float, help="非质量单位（个/杯/份…）的单个克重")
     add_parser.add_argument("--alias", action="append", default=[], help="别名，可重复")
     add_parser.add_argument("--source", default="", help="数据来源，如 USDA / CFCT / 估算")
+    add_parser.add_argument("--notes", "--basis", dest="notes", default="", help="备注；source=估算 时必填估算依据")
     add_parser.add_argument("--id", help="自定义 id（默认取名称）")
     add_parser.set_defaults(handler=_handle_food_add)
 

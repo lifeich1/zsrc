@@ -463,6 +463,25 @@ class LoadFoodsTest(TempHomeMixin, unittest.TestCase):
         self.assertEqual(len({food.id for food in library}), len(library))
         self.assertIn("鸡蛋", {food.name for food in library})
 
+    def test_notes_roundtrip(self) -> None:
+        library = [foods.build_food("外卖炒饭", 700, per=100, unit="g", source="估算",
+                                    notes="按米饭 400g + 油 15g 加权")]
+        foods.save_foods(library)
+        back = foods.load_foods()
+        self.assertEqual(back[0].source, "估算")
+        self.assertEqual(back[0].notes, "按米饭 400g + 油 15g 加权")
+
+    def test_old_data_without_notes_still_loads(self) -> None:
+        self._write(
+            {"foods": [
+                {"id": "米饭", "name": "米饭", "kcal": 116, "per": 100, "unit": "g",
+                 "protein_g": 2.6}
+            ]}
+        )
+        library = foods.load_foods()
+        self.assertEqual(len(library), 1)
+        self.assertEqual(library[0].notes, "")
+
 
 class DayLogEditTest(unittest.TestCase):
     @staticmethod
@@ -708,6 +727,24 @@ class CliEndToEndTest(TempHomeMixin, unittest.TestCase):
         code, out = self._run("weight", "0")
         self.assertEqual(code, 1)
         self.assertIn("必须大于 0", out)
+
+    def test_food_add_estimate_requires_notes(self) -> None:
+        code, out = self._run("food", "add", "外卖炒饭", "--kcal", "700",
+                              "--p", "20", "--f", "25", "--c", "90", "--source", "估算")
+        self.assertEqual(code, 1)
+        self.assertIn("--notes", out)
+
+        code, out = self._run("food", "add", "外卖炒饭", "--kcal", "700",
+                              "--p", "20", "--f", "25", "--c", "90",
+                              "--source", "估算", "--notes", "按米饭 400g + 油 15g 加权")
+        self.assertEqual(code, 0)
+        self.assertIn("已加入食物库", out)
+        self.assertIn("按米饭 400g + 油 15g 加权", out)
+
+        library = foods.load_foods()
+        est = next(f for f in library if f.id == "外卖炒饭")
+        self.assertEqual(est.source, "估算")
+        self.assertEqual(est.notes, "按米饭 400g + 油 15g 加权")
 
 
 if __name__ == "__main__":

@@ -31,10 +31,10 @@ python3 -W error::DeprecationWarning -m unittest discover tests   # 把弃用警
 | `UnitConversionTest` | `g/克/kg/ml` 换算、默认单位、计数单位依赖 `grams`、`parse_amount()` |
 | `ComputeEntryTest` | 线性缩放、按个与按克等价、四舍五入、`custom_entry()` |
 | `MatchFoodTest` | 匹配优先级（id→名称→别名→包含）、无命中、模糊候选排序 |
-| `LoadFoodsTest` | 裸数组/重复 id/缺字段/非质量单位缺 grams/非法顶层、保存往返、id 唯一化、内置库校验 |
+| `LoadFoodsTest` | 裸数组/重复 id/缺字段/非质量单位缺 grams/非法顶层、保存往返、id 唯一化、内置库校验、`notes` 往返与旧数据兼容 |
 | `DayLogEditTest` | 按餐次追加、正/负索引与越界、多次增删后合计一致性、`is_empty()` |
 | `ReportRenderTest` | 进度条边界、达标判定、日报/周报/月报/体重渲染、sparkline |
-| `CliEndToEndTest` | `add→show→rm` 全流程、多次增删合计、未命中食物、`--custom`、`weight/week/month/target` |
+| `CliEndToEndTest` | `add→show→rm` 全流程、多次增删合计、未命中食物、`--custom`、`weight/week/month/target`、`food add` 估算强制 `--notes` |
 
 ## 新增测试约定
 

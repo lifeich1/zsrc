@@ -28,6 +28,7 @@
 | `protein_g` / `fat_g` / `carb_g` | | 每 `per unit` 的宏量（克），缺省 0 |
 | `grams` | | **非质量单位必填**：单个单位的克重（如 `个: 50`） |
 | `source` | | 数据来源，如 `USDA` / `CFCT` / `估算` |
+| `notes` | | 自由文本备注；`source=估算` 时必填估算依据（如「按瘦肉 100g + 油 15g 加权」） |
 
 ## `meals/YYYY-MM-DD.json`
 
