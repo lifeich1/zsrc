@@ -4,7 +4,7 @@ description: 记录每日饮食并按食物库计算热量与宏量营养素（�
 license: MIT
 metadata:
   author: lintd
-  version: "1.0"
+  version: "1.1"
 ---
 
 # calory —— 每日热量与宏量记录
@@ -21,6 +21,23 @@ metadata:
 - 输出是中文纯文本，没有 JSON 选项；需要核对数值时读输出，或 `cat /calory/data/meals/<YYYY-MM-DD>.json`。
 - 热量与宏量是**写入时的快照**：之后改食物库不会影响历史记录。
 
+## 数据来源（新入库强制）
+
+新食物的营养值**必须先查权威数据源**，再用 `cal food add --source <来源>` 标注来源。
+**不得凭记忆填写热量，不得留空 `--source`**。
+
+| 优先级 | 来源标签 | 数据源 | 适用场景 | 在线查询方式 |
+| --- | --- | --- | --- | --- |
+| 1 | `CFCT` | 中国食物成分表（第6版）· 中国疾控中心营养与健康所编著 | 中餐食材、中式加工食品、主食、蔬菜、肉类 | 检索已有库内 CFCT 条目比对口径；或查询公开转载（网易、薄荷等第三方转载，需与 CFCT 原始数值交叉核对） |
+| 2 | `USDA` | USDA FoodData Central · 美国农业部农业研究局 | 西方食物、基础食材、预包装食品、通用鱼类/肉类 | https://fdc.nal.usda.gov/（网页搜索）；或 API：`curl -s "https://api.nal.usda.gov/fdc/v1/foods/search?api_key=DEMO_KEY&query=<英文名>"`（DEMO_KEY 每小时 30 次） |
+| 3 | `估算` | 多源交叉估算 | 外卖、餐厅混合菜、两权威源均查不到的食物 | 按主要原料重量加权估算，在汇报中说明估算依据与主要原料数值 |
+
+规则：
+- **中餐食物优先查 CFCT**；CFCT 查不到再用 USDA；两者都查不到才允许标 `估算`。
+- 查 USDA 时先用中文名搜，搜不到换英文名，对比 `per 100 g` 基值。
+- `估算` 条目必须有具体估算依据（如「按瘦肉 100g + 油 15g 加权」），禁止无依据写数。
+- 新 food id 入库后 `cal show` 复核，确保预估值与当日合计不异常。
+
 ## 常用命令
 
 | 目的 | 命令 |
@@ -31,6 +48,7 @@ metadata:
 | 食物库没有时手录 | `cal add dinner --custom 外卖炒饭 700 --p 20 --f 25 --c 90` |
 | 删除某条 | `cal rm lunch 2` / `cal rm 昨天 晚餐 last` |
 | 查食物库 | `cal food search 鸡` |
+| 新增食物条目（须带来源） | `cal food add 鸡胸肉 --kcal 165 --p 31 --f 3.6 --source USDA` |
 | 周报 / 月报 | `cal week`、`cal week -1`、`cal month 2025-09` |
 | 体重 | `cal weight 70.5` / `cal weight` |
 | 查看或修改目标 | `cal target` / `cal target 2000 --protein 120 --fat 65 --carb 220` |
@@ -39,11 +57,12 @@ metadata:
 
 1. 先 `cal food search <关键词>` 确认食物在不在库；
 2. 在库：`cal add <餐次> <食物名或别名> <数量>`；
-3. 不在库：`cal add <餐次> --custom <名称> <kcal> [--p --f --c]`，常用食物可先用 `cal food add` 建条目；
+3. 不在库：`cal add <餐次> --custom <名称> <kcal> [--p --f --c]`，常用食物可先用 `cal food add` 建条目（**必须先查权威数据源并带 `--source`，见「数据来源」节**）；
 4. 记录完用 `cal show` 复核合计与进度条，再向用户汇报已摄入与剩余热量。
 
 ## 不要做的事
 
 - 不要手写或编辑 `/calory/data/meals/*.json`、`/calory/data/weight.json`——一律走 CLI，避免破坏快照语义与餐次结构。
+- 不要凭记忆填热量或留空 `--source`：新入库食物必须先查 CFCT/USDA 权威数据源（见「数据来源」节），无法查到权威数值才允许标 `估算` 并给出估算依据。
 - 不要自己按「每 100g」心算份量：`cal` 会按 `qty` + `unit` 自动换算。
 - 记录完成后提醒用户：数据落在仓库 `calory/data/`，需要自己 `git add` / `git commit` 才会同步到其他设备。
