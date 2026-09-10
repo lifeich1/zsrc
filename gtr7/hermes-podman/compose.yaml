@@ -2,7 +2,8 @@
 #
 # 官方镜像文档：https://hermes-agent.nousresearch.com/docs/user-guide/docker
 # 数据（配置、密钥、sessions、skills、记忆、日志）全部落在宿主 ${HERMES_DATA_DIR}，
-# 本地 derived image（见 Dockerfile）只打一个 keep-id 兼容补丁，镜像本身无状态；
+# 本地 derived image（见 Dockerfile）打 keep-id 兼容补丁 + skills 软链接，
+# 镜像本身无状态；
 # 升级 = pull 上游镜像 + rebuild + 重建容器。
 #
 # 首次使用先跑一次交互式向导，把 API key 写进 ${HERMES_DATA_DIR}/.env：
@@ -15,8 +16,8 @@
 
 services:
   hermes:
-    # 本地 derived image：Dockerfile 给官方镜像的 stage2-hook.sh 打
-    # keep-id 兼容补丁（usermod -o），原因见 Dockerfile 注释
+    # 本地 derived image：Dockerfile 打两个补丁（stage2-hook.sh 的
+    # keep-id 兼容补丁 + cont-init.d/50-link-skills 软链接），原因见 Dockerfile
     image: hermes-agent:local
     build: .
     container_name: hermes
@@ -55,8 +56,11 @@ services:
       - "${HERMES_DATA_DIR:-/home/fool/.hermes}:/opt/data"
       # calory 读写挂载：agent 需要 cal add 写 data/meals/YYYY-MM-DD.json
       - "../../calory:/calory"
-      # calory 用法说明，挂进 Hermes 的 skills 目录（只读）
-      - "./skills/calory:/opt/data/skills/calory:ro"
+      # calory 用法说明：挂到独立路径（不嵌套在 /opt/data 下——Podman
+      # keep-id 下子路径嵌套挂载会冲突），由 Dockerfile 里的 cont-init.d
+      # 脚本在启动时软链接到 /opt/data/skills/calory。可写，agent 对
+      # SKILL.md 的修改会写回仓库，容器重启不丢
+      - "./skills/calory:/opt/hermes-skills-calory"
       # calory 入口 wrapper，落进 PATH，容器内可直接 `cal show`
       - "./bin/cal:/usr/local/bin/cal:ro"
 

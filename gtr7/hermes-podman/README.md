@@ -18,7 +18,7 @@
 | `Dockerfile` | derived image：给 `stage2-hook.sh` 打 keep-id 兼容补丁（`usermod -o`） |
 | `.env.example` | 部署参数模板；`cp .env.example .env` 后按需改，`.env` 不入库 |
 | `bin/cal` | 容器内 `cal` wrapper：挑一个 ≥3.10 的 Python 跑 `/calory/cal` |
-| `skills/calory/SKILL.md` | 给 agent 的 calory 用法说明（挂到 `/opt/data/skills/calory`） |
+| `skills/calory/SKILL.md` | 给 agent 的 calory 用法说明（通过 cont-init.d 脚本软链接到 `/opt/data/skills/calory`，见 `Dockerfile`） |
 
 ## 不变量与约定
 
@@ -34,7 +34,14 @@
   keep-id 会在容器内注入宿主 UID 的用户条目（`fool:1000`），与仓里 `PUID=1000` 的
   usermod 冲突。`Dockerfile` 给 `usermod` 加 `-o`（允许非唯一 UID）绕过此冲突。
 - **`/opt/hermes` 是只读安装树**：不要在运行时往里装东西（官方设计如此）。
-  `Dockerfile` 只做一行 sed 补丁（`usermod -o`），不改变镜像的只读设计。
+  `Dockerfile` 只打两个补丁：`stage2-hook.sh` 的一行 sed（`usermod -o`）
+  和 `cont-init.d/50-link-skills`（启动时把 calory skill 软链接进数据目录），
+  不改变镜像的只读设计。
+- **skills 挂载不嵌套**：Podman `keep-id` 下，往已挂载的 `/opt/data` 子路径再挂载
+  （如 `/opt/data/skills/calory`）会因用户命名空间遮蔽而失效。calory skill 挂到独立路径
+  `/opt/hermes-skills-calory`，由 `50-link-skills` 在 Hermes 启动前软链接到
+  `/opt/data/skills/calory`；可写——agent 对 `SKILL.md` 的修改会写回仓库，容器重启不丢，
+  但改动会让 `git status` 变脏，注意取舍。
 - **两个端口，暴露面不同**：`127.0.0.1:8642` 是 gateway 的 OpenAI 兼容 API，只绑回环；
   `9119` 是 dashboard backend（Hermes 客户端与手机浏览器连的就是它），按 `.env` 里的
   `HERMES_DASHBOARD_BIND` 绑到局域网（默认 `0.0.0.0`）。
@@ -81,7 +88,7 @@ podman-compose up -d --force-recreate
 | 宿主 | 容器内 | 说明 |
 | --- | --- | --- |
 | `../../calory`（即仓库 `calory/`） | `/calory` | 读写挂载，`CALORY_HOME=/calory` |
-| `skills/calory/SKILL.md` | `/opt/data/skills/calory/SKILL.md` | 只读，agent 按需加载 |
+| `skills/calory/SKILL.md` | `/opt/hermes-skills-calory/SKILL.md` ⤵ `/opt/data/skills/calory/SKILL.md` | 可写软链接（cont-init.d），agent 可修改，重启不丢 |
 | `bin/cal` | `/usr/local/bin/cal` | 只读，容器内直接 `cal show` |
 
 容器内等价命令：
@@ -146,7 +153,7 @@ ss -ltnp | grep 9119                               # 确认宿主在 0.0.0.0:911
 | 需求 | 改动点 |
 | --- | --- |
 | 换上游镜像版本 / 加环境变量 | `compose.yaml` 的 `image` / `build` / `environment`，改完 rebuild |
-| 改 keep-id 兼容补丁 | `Dockerfile`（`stage2-hook.sh` 的 sed 补丁） |
+| 改 keep-id 兼容补丁 / 启动时 skills 软链接 | `Dockerfile`（`stage2-hook.sh` 的 sed 补丁 + `50-link-skills` 脚本） |
 | 改数据目录、UID/GID | `.env`（从 `.env.example` 复制） |
 | 关闭 / 收窄局域网访问 | `.env` 里 `HERMES_DASHBOARD_BIND=127.0.0.1`，或删掉 `compose.yaml` 的 9119 映射并设 `HERMES_DASHBOARD: "0"` |
 | 改 dashboard 凭据 | `.env`（`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD` / `_SECRET`） |
