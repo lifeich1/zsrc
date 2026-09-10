@@ -21,8 +21,15 @@ services:
 
     environment:
       # ---- Hermes ----
-      # dashboard 默认关闭；要开就改成 "1" 并放开 9119 端口（见 README）
-      HERMES_DASHBOARD: "0"
+      # dashboard：Hermes 客户端（Remote gateway）与手机浏览器连的就是它
+      HERMES_DASHBOARD: "1"
+      # 容器内必须绑 0.0.0.0，否则端口映射出来也连不上（默认 127.0.0.1）
+      HERMES_DASHBOARD_HOST: "0.0.0.0"
+      # 非回环绑定会强制认证：缺凭据时 dashboard 直接 fail closed 不启动。
+      # 凭据不写在这里，从仓库外的 .env 注入（见 .env.example）
+      HERMES_DASHBOARD_BASIC_AUTH_USERNAME: "${HERMES_DASHBOARD_BASIC_AUTH_USERNAME:-}"
+      HERMES_DASHBOARD_BASIC_AUTH_PASSWORD: "${HERMES_DASHBOARD_BASIC_AUTH_PASSWORD:-}"
+      HERMES_DASHBOARD_BASIC_AUTH_SECRET: "${HERMES_DASHBOARD_BASIC_AUTH_SECRET:-}"
       # 让容器内的 hermes 服务以宿主用户身份运行，写回 calory/data 的文件
       # 属主才是宿主 fool，git 才能正常提交
       PUID: "${PUID:-1000}"
@@ -35,6 +42,9 @@ services:
     ports:
       # gateway 的 OpenAI 兼容 API；只绑回环，不对外暴露
       - "127.0.0.1:8642:8642"
+      # dashboard backend：局域网可达，Hermes 客户端 / 手机浏览器连这个。
+      # 改 .env 里的 HERMES_DASHBOARD_BIND 可收窄到某个 IP（Tailscale 等）
+      - "${HERMES_DASHBOARD_BIND:-0.0.0.0}:9119:9119"
 
     volumes:
       # Hermes 全部持久化数据（含 .env 密钥、config.yaml、sessions、skills、logs）
