@@ -4,7 +4,7 @@ description: 记录每日饮食并按食物库计算热量与宏量营养素（�
 license: MIT
 metadata:
   author: lintd
-  version: "1.1"
+  version: "1.3"
 ---
 
 # calory —— 每日热量与宏量记录
@@ -35,7 +35,7 @@ metadata:
 规则：
 - **中餐食物优先查 CFCT**；CFCT 查不到再用 USDA；两者都查不到才允许标 `估算`。
 - 查 USDA 时先用中文名搜，搜不到换英文名，对比 `per 100 g` 基值。
-- `估算` 条目必须有具体估算依据（如「按瘦肉 100g + 油 15g 加权」），禁止无依据写数。
+- `估算` 条目必须用 `--notes` 给出具体估算依据（如 `--notes "按瘦肉 100g + 油 15g 加权"`），CLI 会强制校验；禁止无依据写数。
 - 新 food id 入库后 `cal show` 复核，确保预估值与当日合计不异常。
 
 ## 常用命令
@@ -47,8 +47,9 @@ metadata:
 | 记录一餐 | `cal add lunch 鸡胸肉 200g` |
 | 食物库没有时手录 | `cal add dinner --custom 外卖炒饭 700 --p 20 --f 25 --c 90` |
 | 删除某条 | `cal rm lunch 2` / `cal rm 昨天 晚餐 last` |
-| 查食物库 | `cal food search 鸡` |
+| 查食物库 | `cal food search 鸡 / cal food list` |
 | 新增食物条目（须带来源） | `cal food add 鸡胸肉 --kcal 165 --p 31 --f 3.6 --source USDA` |
+| 新增估算条目（须带估算依据） | `cal food add 外卖炒饭 --kcal 700 --p 20 --f 25 --c 90 --source 估算 --notes "按米饭 400g + 油 15g 加权"` |
 | 周报 / 月报 | `cal week`、`cal week -1`、`cal month 2025-09` |
 | 体重 | `cal weight 70.5` / `cal weight` |
 | 查看或修改目标 | `cal target` / `cal target 2000 --protein 120 --fat 65 --carb 220` |
@@ -57,12 +58,28 @@ metadata:
 
 1. 先 `cal food search <关键词>` 确认食物在不在库；
 2. 在库：`cal add <餐次> <食物名或别名> <数量>`；
-3. 不在库：`cal add <餐次> --custom <名称> <kcal> [--p --f --c]`，常用食物可先用 `cal food add` 建条目（**必须先查权威数据源并带 `--source`，见「数据来源」节**）；
+3. 不在库：`cal add <餐次> --custom <名称> <kcal> [--p --f --c]`，常用食物可先用 `cal food add` 建条目（**必须先查权威数据源并带 `--source`，估算则额外加 `--notes` 说明依据，见「数据来源」节**）；
 4. 记录完用 `cal show` 复核合计与进度条，再向用户汇报已摄入与剩余热量。
+
+## 已知限制（实测）
+
+- **`--source` 非 `估算` 时不被 CLI 校验**：`cal food add X --kcal 100`（不带来源）仍会
+  静默成功，条目也不会显示 `[来源]` 标签。
+  只有 `--source 估算` 会强制要求 `--notes`（CLI 会报错）。
+  所以非估算来源的条目「必须带 `--source`」仍是自律约定，
+  每次 `cal food add` 后用 `cal food search <名称>` 复核标签是否写进去了。
+- **容器内 `/calory` 不是 git 仓库**（`.git` 未挂载，`git status` 直接报 `not a git repository`）。
+  收尾提醒里的 `git add` / `git commit` 只能在宿主仓库做，不要在容器里尝试。
+- **估算依据存于 `foods.json` 的 `notes` 字段**：`--source 估算` 的条目 CLI 强制要求
+  `--notes`，估算依据落盘后可回溯；`cal food search` 也会展示。
+  之前的旧条目无 `notes` 字段则视为空缺（向前兼容）。
+- **不要用 `head`/`tail`/`less` 管道截断 `cal` 输出**：SIGPIPE 未处理，会抛
+  `BrokenPipeError` 回溯（如 `cal food list | head`）。需要少看几行就直接跑完整命令，
+  输出本来就不长。
 
 ## 不要做的事
 
 - 不要手写或编辑 `/calory/data/meals/*.json`、`/calory/data/weight.json`——一律走 CLI，避免破坏快照语义与餐次结构。
-- 不要凭记忆填热量或留空 `--source`：新入库食物必须先查 CFCT/USDA 权威数据源（见「数据来源」节），无法查到权威数值才允许标 `估算` 并给出估算依据。
+- 不要凭记忆填热量或留空 `--source`：新入库食物必须先查 CFCT/USDA 权威数据源（见「数据来源」节），无法查到权威数值才允许标 `估算` 并用 `--notes` 给出估算依据。
 - 不要自己按「每 100g」心算份量：`cal` 会按 `qty` + `unit` 自动换算。
 - 记录完成后提醒用户：数据落在仓库 `calory/data/`，需要自己 `git add` / `git commit` 才会同步到其他设备。
