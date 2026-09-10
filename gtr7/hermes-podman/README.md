@@ -42,6 +42,8 @@
   `/opt/hermes-skills-calory`，由 `50-link-skills` 在 Hermes 启动前软链接到
   `/opt/data/skills/calory`；可写——agent 对 `SKILL.md` 的修改会写回仓库，容器重启不丢，
   但改动会让 `git status` 变脏，注意取舍。
+  `HERMES_WRITE_SAFE_ROOT` 设为 `"/opt/data:/opt/hermes-skills-calory"`，
+  因此 write_file/patch 也能直接写 `/opt/hermes-skills-calory/SKILL.md`，不依赖 shell 命令。
 - **两个端口，暴露面不同**：`127.0.0.1:8642` 是 gateway 的 OpenAI 兼容 API，只绑回环；
   `9119` 是 dashboard backend（Hermes 客户端与手机浏览器连的就是它），按 `.env` 里的
   `HERMES_DASHBOARD_BIND` 绑到局域网（默认 `0.0.0.0`）。
@@ -88,7 +90,7 @@ podman-compose up -d --force-recreate
 | 宿主 | 容器内 | 说明 |
 | --- | --- | --- |
 | `../../calory`（即仓库 `calory/`） | `/calory` | 读写挂载，`CALORY_HOME=/calory` |
-| `skills/calory/SKILL.md` | `/opt/hermes-skills-calory/SKILL.md` ⤵ `/opt/data/skills/calory/SKILL.md` | 可写软链接（cont-init.d），agent 可修改，重启不丢 |
+| `skills/calory/SKILL.md` | `/opt/hermes-skills-calory/SKILL.md` ⤵ `/opt/data/skills/calory/SKILL.md` | 可写软链接（cont-init.d），agent 可修改，重启不丢；已入 `HERMES_WRITE_SAFE_ROOT` 白名单，write_file 也能写 |
 | `bin/cal` | `/usr/local/bin/cal` | 只读，容器内直接 `cal show` |
 
 容器内等价命令：

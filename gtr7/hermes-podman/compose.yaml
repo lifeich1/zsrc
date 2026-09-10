@@ -40,6 +40,11 @@ services:
       PUID: "${PUID:-1000}"
       PGID: "${PGID:-100}"
       TZ: "${TZ:-Asia/Shanghai}"
+      # file 工具（write_file/patch）的写白名单：只允许写这些前缀内的路径。
+      # 官方镜像默认只有 /opt/data；追加 /opt/hermes-skills-calory，
+      # agent 才能直接 write_file 修改 skills/calory/SKILL.md
+      # （可写挂载，改动写回仓库，见 README「calory 接入」表）
+      HERMES_WRITE_SAFE_ROOT: "/opt/data:/opt/hermes-skills-calory"
       # ---- calory ----
       # 挂载进来的仓库 calory/ 目录：config.json 与 data/ 都在这里
       CALORY_HOME: /calory
