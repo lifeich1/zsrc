@@ -24,9 +24,11 @@ cd calory
 
 ```
 calory/
+├── README.md              # 本文件
 ├── cal                    # 可执行入口（python3）
 ├── config.json            # 个人目标：热量、宏量、体重、餐次
 ├── calory/
+│   ├── README.md          # 模块职责、依赖方向、不变量
 │   ├── cli.py             # 子命令分发
 │   ├── models.py          # 数据模型（Food/Entry/DayLog/WeightLog/Config）
 │   ├── store.py           # JSON 原子读写、路径与日期解析
@@ -34,15 +36,28 @@ calory/
 │   ├── report.py          # 日报/周报/月报渲染、进度条、体重趋势
 │   └── config.py          # config.json 读写
 ├── data/
+│   ├── README.md          # 数据格式与手工编辑须知
 │   ├── foods.json         # 食物营养库（可自建）
 │   ├── meals/
 │   │   └── 2025-09-10.json
 │   └── weight.json        # 体重记录
 └── tests/
+    ├── README.md          # 测试运行方式与用例分布
     └── test_calory.py
 ```
 
 数据根目录默认为本目录，可用环境变量 `CALORY_HOME` 指向别处（测试或维护多份数据时很方便）。
+
+## 目录索引
+
+| 路径 | 说明 |
+| --- | --- |
+| [`calory/`](calory/README.md) | 源码模块职责、依赖方向、不变量与常见改动落点 |
+| [`data/`](data/README.md) | 数据文件格式、字段表与手工编辑须知 |
+| [`tests/`](tests/README.md) | 测试运行方式、用例分布与新增约定 |
+
+这些 README 是给人和 AI 助手的**索引**：先读索引、再按需读代码，可显著减少上下文开销。
+改动源码职责、数据格式或测试结构后，请同步更新对应 README。
 
 ## 命令
 
