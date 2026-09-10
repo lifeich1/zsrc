@@ -3,6 +3,9 @@ Session.vim
 /lastpass_export.csv
 /github-recovery-codes.txt
 
+# hermes-podman 的本地部署参数（含私有路径/UID，不入库）
+gtr7/hermes-podman/.env
+
 .DS_STORE
 *~
 *.bak

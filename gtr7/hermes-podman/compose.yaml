@@ -1,0 +1,59 @@
+# hermes-agent —— Nous Research Hermes Agent，以 gateway 模式常驻运行。
+#
+# 官方镜像文档：https://hermes-agent.nousresearch.com/docs/user-guide/docker
+# 数据（配置、密钥、sessions、skills、记忆、日志）全部落在宿主 ${HERMES_DATA_DIR}，
+# 镜像本身无状态，升级只需 pull 新镜像 + 重建容器。
+#
+# 首次使用先跑一次交互式向导，把 API key 写进 ${HERMES_DATA_DIR}/.env：
+#   podman-compose run --rm hermes setup
+#
+# 日常操作：
+#   podman-compose up -d          # 启动
+#   podman-compose logs -f        # 跟随日志
+#   podman-compose down           # 停止并删除容器（数据保留在 ${HERMES_DATA_DIR}）
+
+services:
+  hermes:
+    image: nousresearch/hermes-agent:latest
+    container_name: hermes
+    restart: unless-stopped
+    command: gateway run
+
+    environment:
+      # ---- Hermes ----
+      # dashboard 默认关闭；要开就改成 "1" 并放开 9119 端口（见 README）
+      HERMES_DASHBOARD: "0"
+      # 让容器内的 hermes 服务以宿主用户身份运行，写回 calory/data 的文件
+      # 属主才是宿主 fool，git 才能正常提交
+      PUID: "${PUID:-1000}"
+      PGID: "${PGID:-100}"
+      TZ: "${TZ:-Asia/Shanghai}"
+      # ---- calory ----
+      # 挂载进来的仓库 calory/ 目录：config.json 与 data/ 都在这里
+      CALORY_HOME: /calory
+
+    ports:
+      # gateway 的 OpenAI 兼容 API；只绑回环，不对外暴露
+      - "127.0.0.1:8642:8642"
+
+    volumes:
+      # Hermes 全部持久化数据（含 .env 密钥、config.yaml、sessions、skills、logs）
+      - "${HERMES_DATA_DIR:-/home/fool/.hermes}:/opt/data"
+      # calory 读写挂载：agent 需要 cal add 写 data/meals/YYYY-MM-DD.json
+      - "../../calory:/calory"
+      # calory 用法说明，挂进 Hermes 的 skills 目录（只读）
+      - "./skills/calory:/opt/data/skills/calory:ro"
+      # calory 入口 wrapper，落进 PATH，容器内可直接 `cal show`
+      - "./bin/cal:/usr/local/bin/cal:ro"
+
+    # 把宿主 uid 映射进容器，配合 PUID/PGID 让写盘属主正确
+    userns_mode: keep-id
+
+    # Playwright/Chromium 需要共享内存
+    shm_size: "1gb"
+
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: "2.0"
