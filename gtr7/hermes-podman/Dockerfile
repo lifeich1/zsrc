@@ -16,17 +16,3 @@ FROM nousresearch/hermes-agent:latest
 
 # 只匹配 `usermod -u `（脚本里唯一的一处是 UID remap；`usermod -aG` 不受影响）
 RUN sed -i 's/usermod -u /usermod -o -u /' /opt/hermes/docker/stage2-hook.sh
-
-# compose.yaml 把 ./skills/calory 挂到 /opt/hermes-skills-calory（独立路径，
-# 不嵌套在 /opt/data 下，避免 Podman keep-id 的子路径嵌套冲突）。
-# 在 Hermes 启动前创建软链接 /opt/data/skills/calory -> /opt/hermes-skills-calory。
-# 可写：agent 对 SKILL.md 的修改会写回仓库，容器重启不丢。
-RUN mkdir -p /etc/cont-init.d && \
-    printf '%s\n' \
-      '#!/bin/sh' \
-      'if [ -d /opt/hermes-skills-calory ]; then' \
-      '  mkdir -p /opt/data/skills' \
-      '  ln -sf /opt/hermes-skills-calory /opt/data/skills/calory' \
-      'fi' \
-    > /etc/cont-init.d/50-link-skills && \
-    chmod +x /etc/cont-init.d/50-link-skills

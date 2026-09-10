@@ -2,8 +2,7 @@
 #
 # 官方镜像文档：https://hermes-agent.nousresearch.com/docs/user-guide/docker
 # 数据（配置、密钥、sessions、skills、记忆、日志）全部落在宿主 ${HERMES_DATA_DIR}，
-# 本地 derived image（见 Dockerfile）打 keep-id 兼容补丁 + skills 软链接，
-# 镜像本身无状态；
+# 本地 derived image（见 Dockerfile）打 keep-id 兼容补丁，镜像本身无状态；
 # 升级 = pull 上游镜像 + rebuild + 重建容器。
 #
 # 首次使用先跑一次交互式向导，把 API key 写进 ${HERMES_DATA_DIR}/.env：
@@ -16,8 +15,8 @@
 
 services:
   hermes:
-    # 本地 derived image：Dockerfile 打两个补丁（stage2-hook.sh 的
-    # keep-id 兼容补丁 + cont-init.d/50-link-skills 软链接），原因见 Dockerfile
+    # 本地 derived image：Dockerfile 给 stage2-hook.sh 打 keep-id 兼容补丁（usermod -o），
+    # 原因见 Dockerfile
     image: hermes-agent:local
     build: .
     container_name: hermes
@@ -41,10 +40,9 @@ services:
       PGID: "${PGID:-100}"
       TZ: "${TZ:-Asia/Shanghai}"
       # file 工具（write_file/patch）的写白名单：只允许写这些前缀内的路径。
-      # 官方镜像默认只有 /opt/data；追加 /opt/hermes-skills-calory，
-      # agent 才能直接 write_file 修改 skills/calory/SKILL.md
-      # （可写挂载，改动写回仓库，见 README「calory 接入」表）
-      HERMES_WRITE_SAFE_ROOT: "/opt/data:/opt/hermes-skills-calory"
+      # calory skill 接入已移除（skill manager 不穿透软链接，同步方案待定），
+      # 只留官方默认的 /opt/data
+      HERMES_WRITE_SAFE_ROOT: "/opt/data"
       # ---- calory ----
       # 挂载进来的仓库 calory/ 目录：config.json 与 data/ 都在这里
       CALORY_HOME: /calory
@@ -61,11 +59,6 @@ services:
       - "${HERMES_DATA_DIR:-/home/fool/.hermes}:/opt/data"
       # calory 读写挂载：agent 需要 cal add 写 data/meals/YYYY-MM-DD.json
       - "../../calory:/calory"
-      # calory 用法说明：挂到独立路径（不嵌套在 /opt/data 下——Podman
-      # keep-id 下子路径嵌套挂载会冲突），由 Dockerfile 里的 cont-init.d
-      # 脚本在启动时软链接到 /opt/data/skills/calory。可写，agent 对
-      # SKILL.md 的修改会写回仓库，容器重启不丢
-      - "./skills/calory:/opt/hermes-skills-calory"
       # calory 入口 wrapper，落进 PATH，容器内可直接 `cal show`
       - "./bin/cal:/usr/local/bin/cal:ro"
 
