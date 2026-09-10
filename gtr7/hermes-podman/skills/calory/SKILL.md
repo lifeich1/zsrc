@@ -58,7 +58,7 @@ metadata:
 
 1. 先 `cal food search <关键词>` 确认食物在不在库；
 2. 在库：`cal add <餐次> <食物名或别名> <数量>`；
-3. 不在库：`cal add <餐次> --custom <名称> <kcal> [--p --f --c]`，常用食物可先用 `cal food add` 建条目（**必须先查权威数据源并带 `--source`，估算则额外加 `--notes` 说明依据，见「数据来源」节**）；
+3. 不在库：`cal add <餐次> --custom <名称> <kcal> [--p --f --c]`，常用食物可先用 `cal food search <名称>` 查重后 `cal food add` 建条目（**必须先查权威数据源并带 `--source`，估算则额外加 `--notes` 说明依据，见「数据来源」节**）；
 4. 记录完用 `cal show` 复核合计与进度条，再向用户汇报已摄入与剩余热量。
 
 ## 已知限制（实测）
@@ -68,6 +68,23 @@ metadata:
   只有 `--source 估算` 会强制要求 `--notes`（CLI 会报错）。
   所以非估算来源的条目「必须带 `--source`」仍是自律约定，
   每次 `cal food add` 后用 `cal food search <名称>` 复核标签是否写进去了。
+- **`cal food add` 不校验重名，重名会静默劫持记录**：只校验 `id`，而 `id` 默认取名称，
+  所以中文重名几乎不会撞 id，同名条目可以重复入库；此后 `cal add <名称>` 会静默命中其中一条
+  （实测命中了后入库的那条），既不报歧义也不警告。入库前必须先 `cal food search <名称>` 查重；
+  误建后按 id 精确记录（`cal add lunch rice-cooked 100g`），并手工从 `foods.json` 删掉多余条目
+  （`cal food` 没有删除子命令，`foods.json` 允许手编）。
+- **`--kcal` 只对 `--custom` 生效**：`cal add snack 苹果 1个 --kcal 999` 会静默忽略 `--kcal`，
+  仍按食物库快照记 95 kcal，不报错。别用它覆盖库值或核对数值。
+- **`cal add` 的日期只能走 `-d`**：位置参数固定是 `<餐次> <食物> <数量>`，写成
+  `cal add 前天 早餐 米饭 100g` 会报 `unrecognized arguments: 100g`（exit 2），
+  正确写法是 `cal add 早餐 米饭 100g -d 前天`。只有 `cal show` / `cal rm` 把日期当位置参数。
+- **质量单位的食物不能按「杯/份」计量**：库内 `酸奶` 是「每 100 g」，`cal add lunch 酸奶 1杯`
+  会报「缺少 grams，无法按「杯」计量；请改用 g」；改用 `g` / `ml`，或先给该食物补 `grams`。
+- **`CALORY_HOME` 必须指向含 `cal` 入口脚本的仓库根**：`/usr/local/bin/cal` 只是挑解释器的
+  wrapper，会 `exec "$CALORY_HOME/cal"`（默认 `/calory`）；指向裸数据目录会报
+  `can't open file '.../cal'`。要在别处试命令得整仓复制（连 `calory/` 包一起）。
+- **改过 `foods.json` 后跑一次自检**：`cd /calory && python3 -m unittest discover tests`
+  （80 用例；测试自己把 `CALORY_HOME` 指到临时目录，不会碰真实数据）。
 - **容器内 `/calory` 不是 git 仓库**（`.git` 未挂载，`git status` 直接报 `not a git repository`）。
   收尾提醒里的 `git add` / `git commit` 只能在宿主仓库做，不要在容器里尝试。
 - **估算依据存于 `foods.json` 的 `notes` 字段**：`--source 估算` 的条目 CLI 强制要求
