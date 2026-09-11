@@ -4,7 +4,7 @@ description: 记录每日饮食并按食物库计算热量与宏量营养素（�
 license: MIT
 metadata:
   author: lintd
-  version: "1.4"
+  version: "1.5"
 ---
 
 # calory —— 每日热量与宏量记录
@@ -85,12 +85,13 @@ metadata:
   `can't open file '.../cal'`。要在别处试命令得整仓复制（连 `calory/` 包一起）。
 - **改过 `foods.json` 后跑一次自检**：`cd /zsrc/calory && python3 -m unittest discover tests`
   （80 用例；测试自己把 `CALORY_HOME` 指到临时目录，不会碰真实数据）。
-- **容器内 `/zsrc` 是完整 git 工作树，但只能看不能提交**（实测 git 2.47.3）：整仓含 `.git`
-  一起挂载，`git status` / `git log` / `git diff` 都正常（工作树默认干净，远程是
-  `git@github.com:lifeich1/zsrc.git`）；但仓库与全局都没配 `user.name` / `user.email`
-  （`git var GIT_AUTHOR_IDENT` 直接报 `Author identity unknown`），`~/.ssh` 也不存在，
-  所以 `git commit` / `git push` 在容器里必然失败——**收尾提醒里的 `git add` / `git commit`
-  只能在宿主仓库做**。不要为了省事往容器里塞身份或推送凭证。
+- **容器内 `/zsrc` 是完整 git 工作树，可以提交、不能推送**（实测 git 2.47.3）：整仓含
+  `.git` 一起挂载，`git status` / `git log` / `git diff` 正常，且 `.git/config` 已配身份
+  （`lifeich1 <lifeich0@gmail.com>`），所以 `git add` / `git commit` **在容器里可以直接做**，
+  提交就落在宿主仓库本体里（`/zsrc` 即宿主仓库，宿主 `git log` 能看到同一个 commit）。
+  但推送不行：容器内无 `~/.ssh` 私钥、无 `known_hosts`，`git ls-remote origin` 直接报
+  `Host key verification failed`（网络其实通），**`git push` 只能回宿主做**——推的就是容器
+  里那些 commit，不用重新提交。不要为了图省事往容器里塞私钥或 token。
 - **估算依据存于 `foods.json` 的 `notes` 字段**：`--source 估算` 的条目 CLI 强制要求
   `--notes`，估算依据落盘后可回溯；`cal food search` 也会展示。
   之前的旧条目无 `notes` 字段则视为空缺（向前兼容）。
@@ -103,4 +104,6 @@ metadata:
 - 不要手写或编辑 `/zsrc/calory/data/meals/*.json`、`/zsrc/calory/data/weight.json`——一律走 CLI，避免破坏快照语义与餐次结构。
 - 不要凭记忆填热量或留空 `--source`：新入库食物必须先查 CFCT/USDA 权威数据源（见「数据来源」节），无法查到权威数值才允许标 `估算` 并用 `--notes` 给出估算依据。
 - 不要自己按「每 100g」心算份量：`cal` 会按 `qty` + `unit` 自动换算。
-- 记录完成后提醒用户：数据落在仓库 `calory/data/`（容器内 `/zsrc/calory/data/`），需要自己 `git add` / `git commit` 才会同步到其他设备。
+- 记录完成后提醒用户：数据落在仓库 `calory/data/`（容器内 `/zsrc/calory/data/`）。
+  **容器内可以直接 `git add` / `git commit`（`.git/config` 已配身份），提交即落在宿主仓库里；
+  但 `git push` 要回宿主做**（容器无 SSH 私钥与 known_hosts）。

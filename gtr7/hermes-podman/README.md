@@ -120,9 +120,13 @@ podman exec -it hermes cal week
 `/opt/hermes/.venv/bin/python`（官方镜像基于 debian:13.4，Python 3.13）。
 
 **写入后的收尾**：agent 记录的内容是仓库 `calory/data/`（容器内 `/zsrc/calory/data/`）
-下的 JSON，需要在宿主手动 `git add calory/data && git commit` 才会同步。
-容器内虽然也能看到 `.git`，但镜像不保证有 `git`、也没配 `user.name` / `user.email`
-与推送凭证，提交与推送一律在宿主做。
+下的 JSON，提交后才能同步到其他设备。`/zsrc` 就是宿主仓库本体（含 `.git` 读写挂载），
+且 `.git/config` 已配身份（`lifeich1 <lifeich0@gmail.com>`），所以**容器内可以直接
+`git add calory/data && git commit`，提交会直接落在宿主仓库里**（实测可行）。
+**推送不行**：容器内没有 `~/.ssh` 私钥、也没有 `known_hosts`（`git ls-remote origin`
+报 `Host key verification failed`），网络本身通（github 22/443 可达）。
+推送仍在宿主做——宿主 `git push` 推的就是容器里那个 commit，不需要重新提交。
+不要为了图省事往容器里塞私钥或 token。
 
 ## 局域网接入（Hermes 客户端 / 手机浏览器）
 
