@@ -12,7 +12,7 @@
 | `v0/` | 梯子服务（Dockerfile + run.sh） | 同上 |
 | `pi/` | 树莓派：systemd 单元与脚本（watch-temp.py、pull-git-bak.sh…） | 同上 |
 | `gtr5/` | GTR5 主机配置：vim/emacs/zsh、systemd、pl 脚本 | 同上 |
-| `gtr7/` | GTR7 主机配置：Hermes Agent 容器（podman compose）+ calory 接入 | [gtr7/hermes-podman/README.md](gtr7/hermes-podman/README.md) |
+| `gtr7/` | GTR7 主机配置：Hermes Agent 容器（podman compose），整仓（含 `calory`）挂进容器 | [gtr7/hermes-podman/README.md](gtr7/hermes-podman/README.md) |
 | `monkey/` | 油猴用户脚本 | 同上 |
 | `openwrt/` | 路由器配置（clash.yaml、add-pkgs.txt、setup 脚本） | 同上 |
 | `utils/` | 通用脚本（memo-update、g-visual.pl） | 同上 |

@@ -10,7 +10,7 @@ metadata:
 # calory —— 每日热量与宏量记录
 
 容器内已装好 `cal` 命令（`/usr/local/bin/cal`，wrapper 会自动挑选 Python 解释器），
-数据根目录是挂载进来的仓库目录 `/calory`（宿主 `zsrc/calory/`），
+数据根目录是挂载进来的仓库 `/zsrc` 下的 `calory/`（宿主 `zsrc/calory/`），
 所以每次记录都会直接落到 git 可追踪的 JSON 文件里。
 
 ## 基本约定
@@ -18,7 +18,7 @@ metadata:
 - 餐次：`breakfast` / `lunch` / `dinner` / `snack`，也接受中文 `早餐` / `午餐` / `晚餐` / `加餐` 与唯一前缀（如 `加`）。
 - 日期：默认今天。支持 `today` / `今天` / `昨天` / `前天`、`2025-09-10`、`09-10`，用 `-d` 指定，如 `cal add snack 苹果 1个 -d 昨天`。
 - 数量：`200g`、`2个`、`1杯`……省略则用食物库里的默认份量。质量单位（`g`/`克`/`kg`/`ml`/`升`）按克换算；计数单位（`个`/`杯`/`份`…）依赖食物库里的单个克重。
-- 输出是中文纯文本，没有 JSON 选项；需要核对数值时读输出，或 `cat /calory/data/meals/<YYYY-MM-DD>.json`。
+- 输出是中文纯文本，没有 JSON 选项；需要核对数值时读输出，或 `cat /zsrc/calory/data/meals/<YYYY-MM-DD>.json`。
 - 热量与宏量是**写入时的快照**：之后改食物库不会影响历史记录。
 
 ## 数据来源（新入库强制）
@@ -81,12 +81,14 @@ metadata:
 - **质量单位的食物不能按「杯/份」计量**：库内 `酸奶` 是「每 100 g」，`cal add lunch 酸奶 1杯`
   会报「缺少 grams，无法按「杯」计量；请改用 g」；改用 `g` / `ml`，或先给该食物补 `grams`。
 - **`CALORY_HOME` 必须指向含 `cal` 入口脚本的仓库根**：`/usr/local/bin/cal` 只是挑解释器的
-  wrapper，会 `exec "$CALORY_HOME/cal"`（默认 `/calory`）；指向裸数据目录会报
+  wrapper，会 `exec "$CALORY_HOME/cal"`（默认 `/zsrc/calory`）；指向裸数据目录会报
   `can't open file '.../cal'`。要在别处试命令得整仓复制（连 `calory/` 包一起）。
-- **改过 `foods.json` 后跑一次自检**：`cd /calory && python3 -m unittest discover tests`
+- **改过 `foods.json` 后跑一次自检**：`cd /zsrc/calory && python3 -m unittest discover tests`
   （80 用例；测试自己把 `CALORY_HOME` 指到临时目录，不会碰真实数据）。
-- **容器内 `/calory` 不是 git 仓库**（`.git` 未挂载，`git status` 直接报 `not a git repository`）。
-  收尾提醒里的 `git add` / `git commit` 只能在宿主仓库做，不要在容器里尝试。
+- **容器内 `/zsrc` 是完整 git 工作树**（整个仓库含 `.git` 一起挂载），但镜像内不保证有
+  `git` 二进制，也没配 `user.name` / `user.email` 与推送凭证，所以 `git status` / `git log`
+  能不能跑取决于镜像；`git add` / `git commit` / `git push` 仍建议在宿主仓库做，
+  不要因为容器里 `git` 能用就往容器里塞凭证。
 - **估算依据存于 `foods.json` 的 `notes` 字段**：`--source 估算` 的条目 CLI 强制要求
   `--notes`，估算依据落盘后可回溯；`cal food search` 也会展示。
   之前的旧条目无 `notes` 字段则视为空缺（向前兼容）。
@@ -96,7 +98,7 @@ metadata:
 
 ## 不要做的事
 
-- 不要手写或编辑 `/calory/data/meals/*.json`、`/calory/data/weight.json`——一律走 CLI，避免破坏快照语义与餐次结构。
+- 不要手写或编辑 `/zsrc/calory/data/meals/*.json`、`/zsrc/calory/data/weight.json`——一律走 CLI，避免破坏快照语义与餐次结构。
 - 不要凭记忆填热量或留空 `--source`：新入库食物必须先查 CFCT/USDA 权威数据源（见「数据来源」节），无法查到权威数值才允许标 `估算` 并用 `--notes` 给出估算依据。
 - 不要自己按「每 100g」心算份量：`cal` 会按 `qty` + `unit` 自动换算。
-- 记录完成后提醒用户：数据落在仓库 `calory/data/`，需要自己 `git add` / `git commit` 才会同步到其他设备。
+- 记录完成后提醒用户：数据落在仓库 `calory/data/`（容器内 `/zsrc/calory/data/`），需要自己 `git add` / `git commit` 才会同步到其他设备。

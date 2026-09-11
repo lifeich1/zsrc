@@ -2,6 +2,8 @@
 #
 # 官方镜像文档：https://hermes-agent.nousresearch.com/docs/user-guide/docker
 # 数据（配置、密钥、sessions、skills、记忆、日志）全部落在宿主 ${HERMES_DATA_DIR}，
+# 整仓（本目录的 ../..，含 .git）读写挂到 /zsrc：agent 能读全仓文档，
+# 也能写 calory 数据与仓库内文档；
 # 本地 derived image（见 Dockerfile）打 keep-id 兼容补丁，镜像本身无状态；
 # 升级 = pull 上游镜像 + rebuild + 重建容器。
 #
@@ -39,13 +41,13 @@ services:
       PUID: "${PUID:-1000}"
       PGID: "${PGID:-100}"
       TZ: "${TZ:-Asia/Shanghai}"
-      # file 工具（write_file/patch）的写白名单：只允许写这些前缀内的路径。
-      # calory skill 接入已移除（skill manager 不穿透软链接，同步方案待定），
-      # 只留官方默认的 /opt/data
-      HERMES_WRITE_SAFE_ROOT: "/opt/data"
+      # file 工具（write_file/patch）的写白名单：只允许写这些前缀内的路径，
+      # 冒号分隔。除官方默认的 /opt/data，追加挂载进来的仓库根 /zsrc，
+      # agent 才能直接改仓库内文档与 skills/calory/SKILL.md
+      HERMES_WRITE_SAFE_ROOT: "/opt/data:/zsrc"
       # ---- calory ----
-      # 挂载进来的仓库 calory/ 目录：config.json 与 data/ 都在这里
-      CALORY_HOME: /calory
+      # 挂载进来的仓库根 /zsrc 下的 calory/：config.json 与 data/ 都在这里
+      CALORY_HOME: /zsrc/calory
 
     ports:
       # gateway 的 OpenAI 兼容 API；只绑回环，不对外暴露
@@ -57,8 +59,10 @@ services:
     volumes:
       # Hermes 全部持久化数据（含 .env 密钥、config.yaml、sessions、skills、logs）
       - "${HERMES_DATA_DIR:-/home/fool/.hermes}:/opt/data"
-      # calory 读写挂载：agent 需要 cal add 写 data/meals/YYYY-MM-DD.json
-      - "../../calory:/calory"
+      # 整仓读写挂载（含 .git，容器内是完整 git 工作树）：agent 能读全仓文档、
+      # 用 cal add 写 calory/data/meals/YYYY-MM-DD.json，也能改仓库内文档；
+      # 属主靠 PUID/PGID + keep-id 保持为宿主 fool，git 提交与同步才正常
+      - "../..:/zsrc"
       # calory 入口 wrapper，落进 PATH，容器内可直接 `cal show`
       - "./bin/cal:/usr/local/bin/cal:ro"
 

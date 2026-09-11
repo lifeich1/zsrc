@@ -4,11 +4,12 @@
 # 官方 hermes-agent 镜像基于 debian:13.4，Python 3.13 装在
 # /opt/hermes/.venv/bin/python，系统里不保证有 python3，
 # 所以这里在运行时挑一个 >= 3.10 的解释器。
-# 数据根目录由 compose 注入的 CALORY_HOME 决定（默认 /calory）。
+# 数据根目录由 compose 注入的 CALORY_HOME 决定（默认 /zsrc/calory，
+# 即整仓挂载点 /zsrc 下的 calory/）。
 
 set -e
 
-CALORY_DIR="${CALORY_HOME:-/calory}"
+CALORY_DIR="${CALORY_HOME:-/zsrc/calory}"
 
 pick_python() {
     for candidate in python3 /usr/bin/python3 /opt/hermes/.venv/bin/python; do

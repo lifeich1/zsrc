@@ -7,8 +7,8 @@
 
 在 GTR7（`nixos-gtr7`）上用 podman + compose 常驻运行 Nous Research 的
 [Hermes Agent](https://github.com/NousResearch/hermes-agent)（`gateway run` 模式），
-并把仓库里的 [`calory`](../../calory/README.md) CLI 挂进容器，
-让 agent 能记录/查询每日热量。
+并把**整个仓库**（含 `.git`）读写挂进容器的 `/zsrc`，让 agent 既能用
+[`calory`](../../calory/README.md) CLI 记录每日热量，也能读/改仓库内的文档与索引。
 
 ## 文件一览
 
@@ -17,7 +17,7 @@
 | `compose.yaml` | 服务定义：镜像、端口、挂载、环境变量、userns、资源限制 |
 | `Dockerfile` | derived image：给 `stage2-hook.sh` 打 keep-id 兼容补丁（`usermod -o`） |
 | `.env.example` | 部署参数模板；`cp .env.example .env` 后按需改，`.env` 不入库 |
-| `bin/cal` | 容器内 `cal` wrapper：挑一个 ≥3.10 的 Python 跑 `/calory/cal` |
+| `bin/cal` | 容器内 `cal` wrapper：挑一个 ≥3.10 的 Python 跑 `/zsrc/calory/cal` |
 | `skills/calory/SKILL.md` | 给 agent 的 calory 用法说明（**接入已暂停**：Hermes skill manager 不穿透软链接，同步方案待定） |
 
 ## 不变量与约定
@@ -26,6 +26,14 @@
   含 API key（`.env`）、`config.yaml`、sessions、skills、logs。容器无状态；
   升级 = pull 上游镜像 + rebuild derived image + 重建容器。
   两个容器不要同时挂同一个数据目录。
+- **整仓挂载**：仓库根（本目录的 `../..`，含 `.git`）读写挂到 `/zsrc`，
+  `CALORY_HOME=/zsrc/calory`，`HERMES_WRITE_SAFE_ROOT="/opt/data:/zsrc"`
+  （冒号分隔的写白名单，决定 agent 的 `write_file` / `patch` 能改哪些前缀；
+  不加 `/zsrc` 时 agent 的 file 工具写不了仓库，只能走 shell）。
+  仓库只挂这一个挂载点，**不要**再往 `/zsrc/...` 子路径上叠挂载——
+  Podman `keep-id` 下子路径挂载会因用户命名空间遮蔽而失效（见下条）。
+  代价：容器内能看到 `gtr7/hermes-podman/.env`；那些凭据本来就以环境变量形式
+  存在于这个容器里，无实质新增暴露，但别把 `/zsrc` 再共享给别的容器。
 - **密钥不入库**：API key 由 `hermes setup` 写进 `${HERMES_DATA_DIR}/.env`；
   本目录的 `.env` 只放镜像/路径/UID 参数，且已被根 `.gitignore` 排除。
 - **属主**：`userns_mode: keep-id` + `PUID/PGID`（默认 1000/100）让容器内进程以宿主 `fool`
@@ -39,7 +47,7 @@
 - **calory skill 尚未接入**：Hermes 的 skill manager 不穿透软链接，
   原先用 `cont-init.d/50-link-skills` 把 `/opt/hermes-skills-calory` 软链接到
   `/opt/data/skills/calory` 的做法实际不生效，已移除（连带 `/opt/hermes-skills-calory`
-  挂载与 `HERMES_WRITE_SAFE_ROOT` 白名单项）。`skills/calory/SKILL.md` 仍留在仓库，
+  挂载与当时的 `HERMES_WRITE_SAFE_ROOT` 白名单项）。`skills/calory/SKILL.md` 仍留在仓库，
   同步方案待定。注意：Podman `keep-id` 下往已挂载的 `/opt/data` 子路径再挂载
   （如 `/opt/data/skills/calory`）会因用户命名空间遮蔽而失效，重新接入时需绕开此坑。
 - **两个端口，暴露面不同**：`127.0.0.1:8642` 是 gateway 的 OpenAI 兼容 API，只绑回环；
@@ -83,12 +91,15 @@ podman-compose up -d --force-recreate
 
 宿主侧日志（容器重建后仍保留）：`${HERMES_DATA_DIR}/logs/gateways/default/current`。
 
-## calory 接入
+## 仓库接入
 
 | 宿主 | 容器内 | 说明 |
 | --- | --- | --- |
-| `../../calory`（即仓库 `calory/`） | `/calory` | 读写挂载，`CALORY_HOME=/calory` |
+| `../..`（仓库根，含 `.git`） | `/zsrc` | 读写挂载；`CALORY_HOME=/zsrc/calory`，数据在 `/zsrc/calory/data/` |
 | `bin/cal` | `/usr/local/bin/cal` | 只读，容器内直接 `cal show` |
+
+仓库根挂到 `/zsrc` 后，agent 能看到 `calory/`、`gtr7/`、根 `AGENTS.md` 等全部文件，
+并用 `write_file` / `patch` 直接改（白名单见「不变量与约定」）。
 
 > calory skill（`skills/calory/SKILL.md`）暂未接入，详见「不变量与约定」。
 
@@ -103,8 +114,10 @@ podman exec -it hermes cal week
 `cal` 会自动挑选解释器：优先系统 `python3`，否则用镜像自带的
 `/opt/hermes/.venv/bin/python`（官方镜像基于 debian:13.4，Python 3.13）。
 
-**写入后的收尾**：agent 记录的内容是仓库 `calory/data/` 下的 JSON，
-需要在宿主手动 `git add calory/data && git commit` 才会同步。
+**写入后的收尾**：agent 记录的内容是仓库 `calory/data/`（容器内 `/zsrc/calory/data/`）
+下的 JSON，需要在宿主手动 `git add calory/data && git commit` 才会同步。
+容器内虽然也能看到 `.git`，但镜像不保证有 `git`、也没配 `user.name` / `user.email`
+与推送凭证，提交与推送一律在宿主做。
 
 ## 局域网接入（Hermes 客户端 / 手机浏览器）
 
@@ -132,6 +145,7 @@ curl -s http://<gtr7-ip>:9119/api/status | python3 -m json.tool | head -5
 podman-compose config                              # 校验 compose 语法与变量替换
 podman exec -it hermes python3 -V                  # 确认容器内 Python
 podman exec -it hermes cal show                    # 确认 calory 可用
+podman exec -it hermes ls /zsrc                    # 确认整仓挂载可见（应列出 calory/ gtr7/ 等）
 ls -l ../../calory/data/meals                      # 确认属主是 fool 而不是 subuid
 curl -s http://127.0.0.1:9119/api/status           # dashboard 是否起来（auth_required 应为 true）
 ss -ltnp | grep 9119                               # 确认宿主在 0.0.0.0:9119 监听
@@ -156,6 +170,8 @@ ss -ltnp | grep 9119                               # 确认宿主在 0.0.0.0:911
 | 换上游镜像版本 / 加环境变量 | `compose.yaml` 的 `image` / `build` / `environment`，改完 rebuild |
 | 改 keep-id 兼容补丁 | `Dockerfile`（`stage2-hook.sh` 的 sed 补丁） |
 | 改数据目录、UID/GID | `.env`（从 `.env.example` 复制） |
+| 调仓库挂载点或读写范围 | `compose.yaml` 的 `volumes`（`../..:/zsrc`，加 `:ro` 即只读） |
+| 改 agent 的 file 工具可写范围 | `compose.yaml` 的 `HERMES_WRITE_SAFE_ROOT`（冒号分隔前缀，改完重建容器） |
 | 关闭 / 收窄局域网访问 | `.env` 里 `HERMES_DASHBOARD_BIND=127.0.0.1`，或删掉 `compose.yaml` 的 9119 映射并设 `HERMES_DASHBOARD: "0"` |
 | 改 dashboard 凭据 | `.env`（`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD` / `_SECRET`） |
 | 调整 calory 用法说明 | `skills/calory/SKILL.md` |

@@ -28,7 +28,7 @@ Daily menu tracking and calorie counting. See [calory/README.md](calory/README.m
 
 ## gtr7
 
-GTR7 host: [Hermes Agent](https://github.com/NousResearch/hermes-agent) running in a podman container, with the repo's `calory` CLI mounted in. See [gtr7/hermes-podman/README.md](gtr7/hermes-podman/README.md).
+GTR7 host: [Hermes Agent](https://github.com/NousResearch/hermes-agent) running in a podman container, with the whole repo (including the `calory` CLI) mounted in at `/zsrc`. See [gtr7/hermes-podman/README.md](gtr7/hermes-podman/README.md).
 
 # Badges
 
