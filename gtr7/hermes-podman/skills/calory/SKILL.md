@@ -4,7 +4,7 @@ description: 记录每日饮食并按食物库计算热量与宏量营养素（�
 license: MIT
 metadata:
   author: lintd
-  version: "1.3"
+  version: "1.4"
 ---
 
 # calory —— 每日热量与宏量记录
@@ -85,10 +85,12 @@ metadata:
   `can't open file '.../cal'`。要在别处试命令得整仓复制（连 `calory/` 包一起）。
 - **改过 `foods.json` 后跑一次自检**：`cd /zsrc/calory && python3 -m unittest discover tests`
   （80 用例；测试自己把 `CALORY_HOME` 指到临时目录，不会碰真实数据）。
-- **容器内 `/zsrc` 是完整 git 工作树**（整个仓库含 `.git` 一起挂载），但镜像内不保证有
-  `git` 二进制，也没配 `user.name` / `user.email` 与推送凭证，所以 `git status` / `git log`
-  能不能跑取决于镜像；`git add` / `git commit` / `git push` 仍建议在宿主仓库做，
-  不要因为容器里 `git` 能用就往容器里塞凭证。
+- **容器内 `/zsrc` 是完整 git 工作树，但只能看不能提交**（实测 git 2.47.3）：整仓含 `.git`
+  一起挂载，`git status` / `git log` / `git diff` 都正常（工作树默认干净，远程是
+  `git@github.com:lifeich1/zsrc.git`）；但仓库与全局都没配 `user.name` / `user.email`
+  （`git var GIT_AUTHOR_IDENT` 直接报 `Author identity unknown`），`~/.ssh` 也不存在，
+  所以 `git commit` / `git push` 在容器里必然失败——**收尾提醒里的 `git add` / `git commit`
+  只能在宿主仓库做**。不要为了省事往容器里塞身份或推送凭证。
 - **估算依据存于 `foods.json` 的 `notes` 字段**：`--source 估算` 的条目 CLI 强制要求
   `--notes`，估算依据落盘后可回溯；`cal food search` 也会展示。
   之前的旧条目无 `notes` 字段则视为空缺（向前兼容）。

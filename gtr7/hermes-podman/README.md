@@ -18,7 +18,7 @@
 | `Dockerfile` | derived image：给 `stage2-hook.sh` 打 keep-id 兼容补丁（`usermod -o`） |
 | `.env.example` | 部署参数模板；`cp .env.example .env` 后按需改，`.env` 不入库 |
 | `bin/cal` | 容器内 `cal` wrapper：挑一个 ≥3.10 的 Python 跑 `/zsrc/calory/cal` |
-| `skills/calory/SKILL.md` | 给 agent 的 calory 用法说明（**接入已暂停**：Hermes skill manager 不穿透软链接，同步方案待定） |
+| `skills/calory/SKILL.md` | 给 agent 的 calory 用法说明（**权威副本**；agent 实际加载的是 `${HERMES_DATA_DIR}/skills/calory/SKILL.md`，改完必须手动同步，见「不变量与约定」） |
 
 ## 不变量与约定
 
@@ -44,12 +44,16 @@
 - **`/opt/hermes` 是只读安装树**：不要在运行时往里装东西（官方设计如此）。
   `Dockerfile` 只打一个补丁：`stage2-hook.sh` 的一行 sed（`usermod -o`），
   不改变镜像的只读设计。
-- **calory skill 尚未接入**：Hermes 的 skill manager 不穿透软链接，
-  原先用 `cont-init.d/50-link-skills` 把 `/opt/hermes-skills-calory` 软链接到
-  `/opt/data/skills/calory` 的做法实际不生效，已移除（连带 `/opt/hermes-skills-calory`
-  挂载与当时的 `HERMES_WRITE_SAFE_ROOT` 白名单项）。`skills/calory/SKILL.md` 仍留在仓库，
-  同步方案待定。注意：Podman `keep-id` 下往已挂载的 `/opt/data` 子路径再挂载
-  （如 `/opt/data/skills/calory`）会因用户命名空间遮蔽而失效，重新接入时需绕开此坑。
+- **calory skill 是「仓库权威 + 宿主副本」两份，靠手工同步**：权威副本是入库的
+  `skills/calory/SKILL.md`；agent 实际加载的是 `${HERMES_DATA_DIR}/skills/calory/SKILL.md`。
+  早先想用 `cont-init.d/50-link-skills` 把 `/opt/hermes-skills-calory` 软链接到
+  `/opt/data/skills/calory` 自动同步，但 Hermes skill manager 不穿透软链接，已移除
+  （连带该挂载与当时的 `HERMES_WRITE_SAFE_ROOT` 白名单项）。**改完权威副本必须同步到宿主**，
+  否则 agent 继续按旧说明操作（已实测漂移：整仓挂载改到 `/zsrc` 后，部署副本还写着数据根是
+  容器内 `/calory`）。宿主同步：`cp gtr7/hermes-podman/skills/calory/SKILL.md
+  ${HERMES_DATA_DIR:-$HOME/.hermes}/skills/calory/SKILL.md`，新会话生效。
+  注意：Podman `keep-id` 下往已挂载的 `/opt/data` 子路径再挂载（如 `/opt/data/skills/calory`）
+  会因用户命名空间遮蔽而失效，别再走这条自动同步路线。
 - **两个端口，暴露面不同**：`127.0.0.1:8642` 是 gateway 的 OpenAI 兼容 API，只绑回环；
   `9119` 是 dashboard backend（Hermes 客户端与手机浏览器连的就是它），按 `.env` 里的
   `HERMES_DASHBOARD_BIND` 绑到局域网（默认 `0.0.0.0`）。
@@ -101,7 +105,8 @@ podman-compose up -d --force-recreate
 仓库根挂到 `/zsrc` 后，agent 能看到 `calory/`、`gtr7/`、根 `AGENTS.md` 等全部文件，
 并用 `write_file` / `patch` 直接改（白名单见「不变量与约定」）。
 
-> calory skill（`skills/calory/SKILL.md`）暂未接入，详见「不变量与约定」。
+> calory skill（仓库 `skills/calory/SKILL.md` → 宿主 `${HERMES_DATA_DIR}/skills/calory/SKILL.md`）
+> 是手工同步的两份，详见「不变量与约定」。
 
 容器内等价命令：
 
