@@ -1,0 +1,29 @@
+{
+  "date": "2026-09-26",
+  "meals": {
+    "lunch": [
+      {
+        "name": "五香卤肘花",
+        "qty": 250.0,
+        "unit": "g",
+        "grams": 250.0,
+        "kcal": 785.0,
+        "protein_g": 53.2,
+        "fat_g": 61.2,
+        "carb_g": 5.2,
+        "food_id": "luzhouhua"
+      },
+      {
+        "name": "沙示",
+        "qty": 300.0,
+        "unit": "ml",
+        "grams": 300.0,
+        "kcal": 123.0,
+        "protein_g": 0.0,
+        "fat_g": 0.0,
+        "carb_g": 30.0,
+        "food_id": "sarsae"
+      }
+    ]
+  }
+}
