@@ -4,7 +4,7 @@ description: 记录每日饮食并按食物库计算热量与宏量营养素（�
 license: MIT
 metadata:
   author: lintd
-  version: "1.5"
+  version: "1.6"
 ---
 
 # calory —— 每日热量与宏量记录
@@ -107,3 +107,28 @@ metadata:
 - 记录完成后提醒用户：数据落在仓库 `calory/data/`（容器内 `/zsrc/calory/data/`）。
   **容器内可以直接 `git add` / `git commit`（`.git/config` 已配身份），提交即落在宿主仓库里；
   但 `git push` 要回宿主做**（容器无 SSH 私钥与 known_hosts）。
+  skill 自身的改动同理，见下节。
+
+## skill 自身改动必须回写仓库
+
+本 skill 是「仓库权威 + 宿主副本」两份，靠手工双向同步：
+
+- 权威副本（入库、可提交）：`/zsrc/gtr7/hermes-podman/skills/calory/SKILL.md`
+  （宿主 `zsrc/gtr7/hermes-podman/skills/calory/SKILL.md`）；
+- agent 实际加载的宿主副本：`/opt/data/skills/health/calory/SKILL.md`
+  （即宿主 `${HERMES_DATA_DIR}/skills/health/calory/SKILL.md`，**不在 git 里**）。
+
+`skill_manage` 改的是宿主副本，改动不会进 git。**任何一次自我改良（补已知限制、修正命令口径、
+更新数据源规则、改版本号）之后，都要把宿主副本拷回权威副本并提交**，否则仓库里的说明重新变旧，
+重建容器或换机部署时被旧版覆盖：
+
+```bash
+cp /opt/data/skills/health/calory/SKILL.md /zsrc/gtr7/hermes-podman/skills/calory/SKILL.md
+cd /zsrc && git add gtr7/hermes-podman/skills/calory/SKILL.md \
+  && git commit -m ":memo: hermes-podman: sync calory skill from host copy"
+```
+
+- 拷完用 `sha256sum` 比对两份，不一致说明漏了；
+- 宿主副本路径会随 Hermes 的 skill 分类变动（calory 现在在 `health/` 下），
+  拷之前先 `find /opt/data/skills -name SKILL.md` 确认真身；
+- `git push` 只能在宿主做（容器无 SSH 私钥与 known_hosts），提交留在宿主仓库等待推送。

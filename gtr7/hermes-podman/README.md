@@ -18,7 +18,7 @@
 | `Dockerfile` | derived image：给 `stage2-hook.sh` 打 keep-id 兼容补丁（`usermod -o`） |
 | `.env.example` | 部署参数模板；`cp .env.example .env` 后按需改，`.env` 不入库 |
 | `bin/cal` | 容器内 `cal` wrapper：挑一个 ≥3.10 的 Python 跑 `/zsrc/calory/cal` |
-| `skills/calory/SKILL.md` | 给 agent 的 calory 用法说明（**权威副本**；agent 实际加载的是 `${HERMES_DATA_DIR}/skills/calory/SKILL.md`，改完必须手动同步，见「不变量与约定」） |
+| `skills/calory/SKILL.md` | 给 agent 的 calory 用法说明（**权威副本**；agent 实际加载的是 `${HERMES_DATA_DIR}/skills/health/calory/SKILL.md`，两份必须手工**双向**同步，见「不变量与约定」） |
 
 ## 不变量与约定
 
@@ -44,16 +44,36 @@
 - **`/opt/hermes` 是只读安装树**：不要在运行时往里装东西（官方设计如此）。
   `Dockerfile` 只打一个补丁：`stage2-hook.sh` 的一行 sed（`usermod -o`），
   不改变镜像的只读设计。
-- **calory skill 是「仓库权威 + 宿主副本」两份，靠手工同步**：权威副本是入库的
-  `skills/calory/SKILL.md`；agent 实际加载的是 `${HERMES_DATA_DIR}/skills/calory/SKILL.md`。
+- **calory skill 是「仓库权威 + 宿主副本」两份，靠手工双向同步**：权威副本是入库的
+  `skills/calory/SKILL.md`；agent 实际加载的是
+  `${HERMES_DATA_DIR}/skills/health/calory/SKILL.md`。**加载路径不是固定值**——Hermes 会按
+  skill 分类挪目录（calory 曾被收进 `health/`），同步前先
+  `find ${HERMES_DATA_DIR:-$HOME/.hermes}/skills -name SKILL.md` 确认真身。
   早先想用 `cont-init.d/50-link-skills` 把 `/opt/hermes-skills-calory` 软链接到
   `/opt/data/skills/calory` 自动同步，但 Hermes skill manager 不穿透软链接，已移除
-  （连带该挂载与当时的 `HERMES_WRITE_SAFE_ROOT` 白名单项）。**改完权威副本必须同步到宿主**，
-  否则 agent 继续按旧说明操作（已实测漂移：整仓挂载改到 `/zsrc` 后，部署副本还写着数据根是
-  容器内 `/calory`）。宿主同步：`cp gtr7/hermes-podman/skills/calory/SKILL.md
-  ${HERMES_DATA_DIR:-$HOME/.hermes}/skills/calory/SKILL.md`，新会话生效。
-  注意：Podman `keep-id` 下往已挂载的 `/opt/data` 子路径再挂载（如 `/opt/data/skills/calory`）
-  会因用户命名空间遮蔽而失效，别再走这条自动同步路线。
+  （连带该挂载与当时的 `HERMES_WRITE_SAFE_ROOT` 白名单项）；Podman `keep-id` 下往已挂载的
+  `/opt/data` 子路径再挂载（如 `/opt/data/skills/calory`）也会因用户命名空间遮蔽而失效。
+  所以**没有任何自动同步**，两个方向都得手工走：
+  - **仓库 → 宿主**（人改了权威副本后）：
+
+    ```bash
+    cp gtr7/hermes-podman/skills/calory/SKILL.md \
+      ${HERMES_DATA_DIR:-$HOME/.hermes}/skills/health/calory/SKILL.md
+    ```
+
+    新会话生效；不同步则 agent 继续按旧说明操作（已实测漂移：整仓挂载改到 `/zsrc` 后，
+    部署副本还写着数据根是容器内 `/calory`）。
+  - **宿主 → 仓库**（agent 自我改良后）：agent 用 `skill_manage` 改的是**宿主副本**，
+    这类改动只落在 `${HERMES_DATA_DIR}`、不在 git 里。发现副本变了就要拷回权威副本并提交，
+    否则仓库说明重新变旧，重建容器或换机部署时被旧版覆盖：
+
+    ```bash
+    cp ${HERMES_DATA_DIR:-$HOME/.hermes}/skills/health/calory/SKILL.md \
+      gtr7/hermes-podman/skills/calory/SKILL.md
+    git add gtr7/hermes-podman/skills/calory/SKILL.md && git commit
+    ```
+
+  核对两份是否一致：`sha256sum` 比对（宿主 `git push` 仍只能在宿主做）。
 - **两个端口，暴露面不同**：`127.0.0.1:8642` 是 gateway 的 OpenAI 兼容 API，只绑回环；
   `9119` 是 dashboard backend（Hermes 客户端与手机浏览器连的就是它），按 `.env` 里的
   `HERMES_DASHBOARD_BIND` 绑到局域网（默认 `0.0.0.0`）。
@@ -105,8 +125,9 @@ podman-compose up -d --force-recreate
 仓库根挂到 `/zsrc` 后，agent 能看到 `calory/`、`gtr7/`、根 `AGENTS.md` 等全部文件，
 并用 `write_file` / `patch` 直接改（白名单见「不变量与约定」）。
 
-> calory skill（仓库 `skills/calory/SKILL.md` → 宿主 `${HERMES_DATA_DIR}/skills/calory/SKILL.md`）
-> 是手工同步的两份，详见「不变量与约定」。
+> calory skill 是手工**双向**同步的两份：权威副本在仓库 `skills/calory/SKILL.md`，
+> agent 加载宿主 `${HERMES_DATA_DIR}/skills/health/calory/SKILL.md`；agent 自我改良后
+> 必须把宿主副本回写仓库并提交，详见「不变量与约定」。
 
 容器内等价命令：
 
@@ -183,5 +204,5 @@ ss -ltnp | grep 9119                               # 确认宿主在 0.0.0.0:911
 | 改 agent 的 file 工具可写范围 | `compose.yaml` 的 `HERMES_WRITE_SAFE_ROOT`（冒号分隔前缀，改完重建容器） |
 | 关闭 / 收窄局域网访问 | `.env` 里 `HERMES_DASHBOARD_BIND=127.0.0.1`，或删掉 `compose.yaml` 的 9119 映射并设 `HERMES_DASHBOARD: "0"` |
 | 改 dashboard 凭据 | `.env`（`HERMES_DASHBOARD_BASIC_AUTH_USERNAME` / `_PASSWORD` / `_SECRET`） |
-| 调整 calory 用法说明 | `skills/calory/SKILL.md` |
+| 调整 calory 用法说明 | `skills/calory/SKILL.md`（改完按「不变量与约定」双向同步；agent 自我改良的宿主副本要回写仓库并提交） |
 | 调整容器内解释器选择 | `bin/cal` |
