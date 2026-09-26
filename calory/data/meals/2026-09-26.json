@@ -27,17 +27,6 @@
     ],
     "dinner": [
       {
-        "name": "米饭",
-        "qty": 200.0,
-        "unit": "g",
-        "grams": 200.0,
-        "kcal": 232.0,
-        "protein_g": 5.2,
-        "fat_g": 0.6,
-        "carb_g": 51.8,
-        "food_id": "rice-cooked"
-      },
-      {
         "name": "黄焖鸡",
         "qty": 250.0,
         "unit": "g",
@@ -47,6 +36,17 @@
         "fat_g": 19.8,
         "carb_g": 14.5,
         "food_id": "huangmenji"
+      },
+      {
+        "name": "米饭",
+        "qty": 400.0,
+        "unit": "g",
+        "grams": 400.0,
+        "kcal": 464.0,
+        "protein_g": 10.4,
+        "fat_g": 1.2,
+        "carb_g": 103.6,
+        "food_id": "rice-cooked"
       }
     ]
   }
