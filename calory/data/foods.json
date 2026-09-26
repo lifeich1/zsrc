@@ -1567,6 +1567,20 @@
       ],
       "source": "包装标签",
       "notes": "亚洲沙示汽水包装营养成分表 170kJ/100mL（≈41kcal）、碳水10.0g、蛋白质0、脂肪0；与 USDA root beer（41kcal/10.6g碳水）、CFCT 特制汽水（42kcal）交叉一致"
+    },
+    {
+      "id": "huangmenji",
+      "name": "黄焖鸡",
+      "kcal": 212.0,
+      "unit": "g",
+      "per": 100.0,
+      "protein_g": 29.4,
+      "fat_g": 7.9,
+      "carb_g": 5.8,
+      "grams": null,
+      "aliases": [],
+      "source": "CFCT",
+      "notes": "以 CFCT《中国食物成分表》禽肉类「卤煮鸡」(每100g: 212kcal/蛋白29.4/脂肪7.9/碳水5.8) 代值；同为酱卤焖制的熟鸡，菜中土豆/糖/油未单列"
     }
   ]
 }

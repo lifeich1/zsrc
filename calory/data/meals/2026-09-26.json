@@ -24,6 +24,30 @@
         "carb_g": 30.0,
         "food_id": "sarsae"
       }
+    ],
+    "dinner": [
+      {
+        "name": "米饭",
+        "qty": 200.0,
+        "unit": "g",
+        "grams": 200.0,
+        "kcal": 232.0,
+        "protein_g": 5.2,
+        "fat_g": 0.6,
+        "carb_g": 51.8,
+        "food_id": "rice-cooked"
+      },
+      {
+        "name": "黄焖鸡",
+        "qty": 250.0,
+        "unit": "g",
+        "grams": 250.0,
+        "kcal": 530.0,
+        "protein_g": 73.5,
+        "fat_g": 19.8,
+        "carb_g": 14.5,
+        "food_id": "huangmenji"
+      }
     ]
   }
 }
