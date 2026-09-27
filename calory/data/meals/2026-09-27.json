@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-27",
+  "meals": {
+    "lunch": [
+      {
+        "name": "沙示",
+        "qty": 300.0,
+        "unit": "ml",
+        "grams": 300.0,
+        "kcal": 123.0,
+        "protein_g": 0.0,
+        "fat_g": 0.0,
+        "carb_g": 30.0,
+        "food_id": "sarsae"
+      },
+      {
+        "name": "青椒肉丝",
+        "qty": 250.0,
+        "unit": "g",
+        "grams": 250.0,
+        "kcal": 332.5,
+        "protein_g": 25.8,
+        "fat_g": 22.5,
+        "carb_g": 7.2,
+        "food_id": "青椒肉丝"
+      },
+      {
+        "name": "米饭",
+        "qty": 250.0,
+        "unit": "g",
+        "grams": 250.0,
+        "kcal": 290.0,
+        "protein_g": 6.5,
+        "fat_g": 0.8,
+        "carb_g": 64.8,
+        "food_id": "rice-cooked"
+      }
+    ]
+  }
+}
