@@ -35,6 +35,19 @@
         "carb_g": 64.8,
         "food_id": "rice-cooked"
       }
+    ],
+    "breakfast": [
+      {
+        "name": "蛋卷",
+        "qty": 200.0,
+        "unit": "g",
+        "grams": 200.0,
+        "kcal": 1000.0,
+        "protein_g": 13.0,
+        "fat_g": 46.0,
+        "carb_g": 132.0,
+        "food_id": "蛋卷"
+      }
     ]
   }
 }
