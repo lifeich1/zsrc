@@ -61,6 +61,41 @@
         "carb_g": 75.4,
         "food_id": "榨菜鲜肉月饼"
       }
+    ],
+    "dinner": [
+      {
+        "name": "生菜",
+        "qty": 500.0,
+        "unit": "g",
+        "grams": 500.0,
+        "kcal": 75.0,
+        "protein_g": 7.0,
+        "fat_g": 1.0,
+        "carb_g": 14.5,
+        "food_id": "lettuce"
+      },
+      {
+        "name": "生米",
+        "qty": 110.0,
+        "unit": "g",
+        "grams": 110.0,
+        "kcal": 380.6,
+        "protein_g": 8.1,
+        "fat_g": 0.9,
+        "carb_g": 84.9,
+        "food_id": "生米"
+      },
+      {
+        "name": "叉烧",
+        "qty": 250.0,
+        "unit": "g",
+        "grams": 250.0,
+        "kcal": 697.5,
+        "protein_g": 59.5,
+        "fat_g": 42.2,
+        "carb_g": 19.8,
+        "food_id": "叉烧"
+      }
     ]
   }
 }
